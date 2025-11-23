@@ -68,24 +68,24 @@
 
 <script type="text/html" data-help-name="bet-type">
   <h3>What this node does</h3>
-  <p>Creates line, place, lay, field, and odds bet entries that feed into <b>Compile Strategy</b>. Options map directly to the CrapsSim bet surface.</p>
+  <p>Builds line, field, place, lay, and supported odds bets that feed into <b>Compile Strategy</b>. Every option maps to a CrapsSim bet surface entry so the recipe can be normalized for execution/export.</p>
 
   <h3>Inputs</h3>
   <ul>
-    <li><b>Bet type</b>: Choose Pass/Don't Pass, Come/Don't Come, Field, Place, Lay, or the matching odds bet. Place/Lay and Come Odds require a point number.</li>
-    <li><b>Amount source</b>: <b>Fixed</b> uses the Amount and Units fields. <b>Feed</b> pulls amount+unit from <code>msg.var</code>, <code>msg.vars[betId]</code>, or <code>msg.amount/msg.unitType</code> when provided.</li>
-    <li><b>Working on come-out</b>: Applies to odds bets when they should work on the come-out roll.</li>
+    <li><b>Bet type</b>: Pass/Don't Pass, Come/Don't Come, Field, Place, Lay, or the matching odds bets. Place/Lay and Come Odds require a point number.</li>
+    <li><b>Amount source</b>: <b>Fixed</b> uses the Amount and Units fields. <b>Feed</b> pulls <code>amount</code> + <code>unitType</code> from <code>msg.var.value</code>, <code>msg.vars[betId]</code>, or <code>msg.amount</code>/<code>msg.unitType</code>.</li>
+    <li><b>Working on come-out</b>: Only shown for odds bets; check it to keep odds active on the come-out roll.</li>
     <li><b>Bet ID</b>/<b>Note</b>: Optional metadata stored with the bet entry.</li>
   </ul>
 
   <h3>Outputs</h3>
-  <p>Appends a bet step to <code>msg.recipe.steps</code> with the selected bet type, amount, unitType, optional number, betId, note, and working flag. Passes the message through for downstream bet nodes or Compile Strategy.</p>
+  <p>Appends a bet step to <code>msg.recipe.steps</code> with the bet type, amount, unitType, optional number, betId, note, and working flag. The message continues downstream for additional bet nodes or <b>Compile Strategy</b>.</p>
 
   <h3>Errors</h3>
   <ul>
     <li>Missing number for Place/Lay/Come Odds/Don't Come Odds.</li>
     <li>Using <b>Feed</b> without supplying amount/unitType via message variables.</li>
-    <li>Odds are only accepted by the Engine API runner; the vanilla exporter will reject them.</li>
+    <li>Odds are accepted only by the Engine API Runner; the legacy exporter rejects them.</li>
   </ul>
 </script>
 

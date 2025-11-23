@@ -30,12 +30,12 @@ RED.nodes.registerType('export', {
 
 <script type="text/x-red" data-help-name="export">
   <h3>What this node does</h3>
-  <p>Generates a legacy CrapsSim-compatible Python strategy file from the compiled bet recipe.</p>
+  <p>Generates a legacy CrapsSim-compatible Python strategy file from the compiled bet recipe. This is the legacy export path; Engine API users should prefer the runtime runner nodes.</p>
 
   <h3>Inputs</h3>
   <ul>
     <li><b>Filename</b>: Target filename for the exported strategy.</li>
-    <li><b>Message fields</b>: expects <code>msg.recipe.steps</code> and optional <code>msg.varTable</code> to convert units to dollars and legalize bets.</li>
+    <li><b>Message fields</b>: expects <code>msg.strategy_config</code> from <b>Compile Strategy</b>; falls back to <code>msg.recipe.steps</code> plus optional <code>msg.varTable</code> to convert units to dollars and legalize bets.</li>
   </ul>
 
   <h3>Outputs</h3>
