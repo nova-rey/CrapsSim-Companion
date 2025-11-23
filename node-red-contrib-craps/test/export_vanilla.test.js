@@ -1,6 +1,7 @@
 const assert = require("assert");
 const exporter = require("../vanilla/export-vanilla.js");
 const { getVarTable } = require("../vanilla/legalizer");
+const { compileStrategyConfig } = require("../lib/strategy_compiler");
 
 const helpers = exporter._test;
 assert(helpers, "Exporter helpers should be exposed for testing");
@@ -40,3 +41,25 @@ const unsupportedConfig = {
 
 const { errors: unsupportedErrors } = helpers.buildCompFromStrategyConfig(unsupportedConfig, vt, () => {});
 assert(Array.isArray(unsupportedErrors) && unsupportedErrors.length === 0, "Unsupported bets should not cause errors");
+
+// Regression: legacy recipe.steps path should map to the same comp as strategy_config
+const recipeSteps = [
+    { type: "pass_line", amount: 10, unitType: "units" },
+    { type: "place_6", amount: 12, unitType: "dollars", number: 6 },
+    { type: "hardway_6", amount: 5, unitType: "units", number: 6 }
+];
+
+const { comp: legacyComp } = helpers.buildCompFromSteps(recipeSteps, vt, () => {});
+
+const { config: compiledConfig, errors: compileErrors } = compileStrategyConfig({
+    steps: recipeSteps,
+    strategyName: "LegacyParity",
+    table: vt
+});
+assert(Array.isArray(compileErrors) && compileErrors.length === 0, `compileStrategyConfig errors: ${compileErrors}`);
+
+const { comp: compiledComp, errors: configErrors } = helpers.buildCompFromStrategyConfig(compiledConfig, vt, () => {});
+assert(Array.isArray(configErrors) && configErrors.length === 0, `buildCompFromStrategyConfig errors: ${configErrors}`);
+
+assert.deepStrictEqual(compiledComp, legacyComp, "strategy_config and legacy recipe paths should agree");
+console.log("export-vanilla legacy compatibility path passed");
