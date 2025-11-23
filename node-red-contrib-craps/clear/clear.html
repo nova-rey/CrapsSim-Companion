@@ -1,8 +1,8 @@
 <script type="text/javascript">
 (function() {
   RED.nodes.registerType('clear', {
-    category: 'craps',
-    color: '#FADBD8',
+    category: 'Craps: Strategy Builder',
+    color: '#64748B',
     defaults: {
       name:  { value: "" },
       mode:  { value: "all" },       // "all" | "specific"
@@ -11,15 +11,16 @@
     },
     inputs: 1,
     outputs: 1,
-    icon: "font-awesome/fa-eraser",
+    icon: "icons/utility-node.svg",
+    paletteLabel: "Clear Bets",
     label: function() {
-      if (this.mode === "all") return this.name || "clear (all)";
+      if (this.mode === "all") return this.name || "Clear Bets (all)";
       const t = Array.isArray(this.types)  ? this.types.join("|") : "";
       const p = Array.isArray(this.points) ? this.points.join(",") : "";
       const pieces = [];
       if (t) pieces.push(`types:${t}`);
       if (p) pieces.push(`points:${p}`);
-      return this.name || `clear (${pieces.join(" ") || "specific"})`;
+      return this.name || `Clear Bets (${pieces.join(" ") || "specific"})`;
     },
     oneditprepare: function() {
       function setSpecificVisible(show) {
@@ -48,7 +49,7 @@
 })();
 </script>
 
-<script type="text/x-red" data-template-name="clear">
+<script type="text/x-red" data-template-name="clear" data-label="Clear Bets">
   <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="">
@@ -97,14 +98,22 @@
 </script>
 
 <script type="text/x-red" data-help-name="clear">
-  <p>Clears bets from <code>msg.bets</code>.</p>
+  <h3>What this node does</h3>
+  <p>Filters or removes bets inside the Node-RED flow (on <code>msg.bets</code>) without calling any CrapsSim clear API.</p>
+
+  <h3>Inputs</h3>
   <ul>
-    <li><b>All bets</b>: empties <code>msg.bets</code>.</li>
-    <li><b>Specific bets</b>: clear by bet <b>type</b> and/or <b>point</b>.</li>
+    <li><b>Mode</b>: Clear all bets or only specific bet types/points.</li>
+    <li><b>Types/Points</b>: When in <b>Specific</b> mode, choose bet families and point numbers to remove.</li>
+    <li><b>Message override</b>: <code>msg.clear</code> can specify <code>{ all: true }</code> or <code>{ types: [...], points: [...] }</code>.</li>
   </ul>
-  <p><b>Runtime override</b>: You can drive clearing via message, e.g.:</p>
-  <pre>msg.clear = { all: true }              // clear all
-msg.clear = { types: ["place"], points: [6,8] }  // clear Place on 6 & 8
-msg.clear = { points: [5] }             // clear anything tied to point 5</pre>
-  <p>Result: <code>msg.bets</code> is filtered; <code>msg.cleared</code> tells how many were removed.</p>
+
+  <h3>Outputs</h3>
+  <p>Passes the message with <code>msg.bets</code> filtered according to the selection and <code>msg.cleared</code> reporting how many entries were removed.</p>
+
+  <h3>Errors</h3>
+  <ul>
+    <li>Providing non-array filter values in <code>msg.clear.types</code> or <code>msg.clear.points</code>.</li>
+    <li>Leaving <code>msg.bets</code> unset (nothing to clear).</li>
+  </ul>
 </script>

@@ -1,11 +1,11 @@
-<script type="text/html" data-template-name="bet-type">
+<script type="text/html" data-template-name="bet-type" data-label="Bet: Line/Place/Lay/Odds">
   <div class="form-row">
-    <label for="node-input-kind"><i class="fa fa-dice"></i> Bet kind</label>
+    <label for="node-input-kind"><i class="fa fa-dice"></i> Bet type</label>
     <select id="node-input-kind">
-      <option value="Pass">Pass</option>
-      <option value="DontPass">DontPass</option>
+      <option value="Pass">Pass Line</option>
+      <option value="DontPass">Don't Pass Line</option>
       <option value="Come">Come</option>
-      <option value="DontCome">DontCome</option>
+      <option value="DontCome">Don't Come</option>
       <option value="PassOdds">Pass Odds</option>
       <option value="DontPassOdds">Don't Pass Odds</option>
       <option value="ComeOdds">Come Odds</option>
@@ -16,9 +16,38 @@
     </select>
   </div>
 
+  <div class="form-row">
+    <label for="node-input-valueSource"><i class="fa fa-sliders"></i> Amount source</label>
+    <select id="node-input-valueSource">
+      <option value="fixed">Fixed (enter amount)</option>
+      <option value="feed">Feed (from Bet Variable / vars)</option>
+    </select>
+  </div>
+
+  <div class="form-row node-fixed-only">
+    <label for="node-input-amount"><i class="fa fa-dollar"></i> Amount</label>
+    <input type="number" id="node-input-amount" min="0" value="0">
+  </div>
+
+  <div class="form-row node-fixed-only">
+    <label for="node-input-unitType"><i class="fa fa-balance-scale"></i> Units</label>
+    <select id="node-input-unitType">
+      <option value="dollars">dollars</option>
+      <option value="units">units</option>
+    </select>
+  </div>
+
   <div class="form-row" id="node-input-number-row">
     <label for="node-input-number"><i class="fa fa-hashtag"></i> Number</label>
-    <input type="number" id="node-input-number" placeholder="4,5,6,8,9,10 (when applicable)">
+    <select id="node-input-number">
+      <option value=""></option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+    </select>
   </div>
 
   <div class="form-row" id="node-input-working-row">
@@ -31,41 +60,32 @@
     <input type="text" id="node-input-betId" placeholder="e.g. place6 (optional)">
   </div>
 
-  <hr>
-
-  <div class="form-row">
-    <label for="node-input-valueSource"><i class="fa fa-sliders"></i> Value Source</label>
-    <select id="node-input-valueSource">
-      <option value="fixed">fixed (enter amount here)</option>
-      <option value="feed">feed (from bet-in / vars)</option>
-    </select>
-  </div>
-
-  <div class="form-row node-fixed-only">
-    <label for="node-input-amount"><i class="fa fa-dollar"></i> Amount</label>
-    <input type="number" id="node-input-amount" min="0" value="0">
-  </div>
-
-  <div class="form-row node-fixed-only">
-    <label for="node-input-unitType"><i class="fa fa-balance-scale"></i> Units</label>
-    <select id="node-input-unitType">
-      <option value="units">units</option>
-      <option value="dollars">dollars</option>
-    </select>
-  </div>
-
   <div class="form-row">
     <label for="node-input-note"><i class="fa fa-sticky-note"></i> Note</label>
-    <input type="text" id="node-input-note" placeholder="optional">
+    <input type="text" id="node-input-note" placeholder="optional comment for this bet">
   </div>
 </script>
 
 <script type="text/html" data-help-name="bet-type">
-  <p>Line/Place/Lay/Field/Odds builder. Choose <b>fixed</b> to enter amount + units here, or <b>feed</b> to read from <code>bet-in</code> / <code>msg.vars[betId]</code> / <code>msg.var</code>.</p>
+  <h3>What this node does</h3>
+  <p>Creates line, place, lay, field, and odds bet entries that feed into <b>Compile Strategy</b>. Options map directly to the CrapsSim bet surface.</p>
+
+  <h3>Inputs</h3>
   <ul>
-    <li><b>Odds:</b> Pass Odds / Don't Pass Odds require only an amount; Come Odds / Don't Come Odds require the point number (4/5/6/8/9/10). Use the <b>Working on come-out</b> checkbox when applicable.</li>
-    <li>Odds map to the Engine API only; the vanilla exporter will reject them explicitly.</li>
-    <li>Place/Lay numbers are only shown when required for the selected bet kind.</li>
+    <li><b>Bet type</b>: Choose Pass/Don't Pass, Come/Don't Come, Field, Place, Lay, or the matching odds bet. Place/Lay and Come Odds require a point number.</li>
+    <li><b>Amount source</b>: <b>Fixed</b> uses the Amount and Units fields. <b>Feed</b> pulls amount+unit from <code>msg.var</code>, <code>msg.vars[betId]</code>, or <code>msg.amount/msg.unitType</code> when provided.</li>
+    <li><b>Working on come-out</b>: Applies to odds bets when they should work on the come-out roll.</li>
+    <li><b>Bet ID</b>/<b>Note</b>: Optional metadata stored with the bet entry.</li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <p>Appends a bet step to <code>msg.recipe.steps</code> with the selected bet type, amount, unitType, optional number, betId, note, and working flag. Passes the message through for downstream bet nodes or Compile Strategy.</p>
+
+  <h3>Errors</h3>
+  <ul>
+    <li>Missing number for Place/Lay/Come Odds/Don't Come Odds.</li>
+    <li>Using <b>Feed</b> without supplying amount/unitType via message variables.</li>
+    <li>Odds are only accepted by the Engine API runner; the vanilla exporter will reject them.</li>
   </ul>
 </script>
 
@@ -87,9 +107,9 @@
         return ctx.working ? " (work)" : "";
       }
       RED.nodes.registerType("bet-type", {
-        category: "craps",
-        color: "#FDEDD0",
-        icon: "font-awesome/fa-dollar",
+        category: "Craps: Strategy Builder",
+        color: "#4C8BF5",
+        icon: "icons/builder-node.svg",
         defaults: {
           kind:        { value: "Pass", required: true },
           number:      { value: "" },
@@ -107,6 +127,7 @@
           $("#node-input-kind").on("change", toggleFixedFields);
           toggleFixedFields();
         },
+        paletteLabel: "Bet: Line/Place/Lay/Odds",
         label: function() {
           const n  = this.number ? ` ${this.number}` : "";
           const vs = this.valueSource === "fixed" ? ` ${this.amount} ${this.unitType}` : " (feed)";

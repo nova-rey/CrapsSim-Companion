@@ -1,4 +1,4 @@
-<script type="text/html" data-template-name="craps-api-runner">
+<script type="text/html" data-template-name="craps-api-runner" data-label="Run: Engine API Simulation">
   <div class="form-row">
     <label for="node-input-apiConfig"><i class="fa fa-cog"></i> API Config</label>
     <input type="text" id="node-input-apiConfig" placeholder="Select api config">
@@ -22,21 +22,34 @@
 </script>
 
 <script type="text/html" data-help-name="craps-api-runner">
-  <p>Runs a compiled strategy_config against the CrapsSim Engine HTTP API.</p>
+  <h3>What this node does</h3>
+  <p>Runs a compiled strategy against the CrapsSim Engine API by creating a session, applying the strategy, and rolling for the requested number of rolls. Calls <code>/session/start</code>, <code>/session/apply_action</code>, <code>/session/roll</code>, and <code>/end_session</code>.</p>
+
+  <h3>Inputs</h3>
   <ul>
-    <li>Requires <code>msg.strategy_config</code> from the Strategy Compiler.</li>
-    <li>Calls <code>/session/start</code>, <code>/session/apply_action</code>, <code>/session/roll</code>, and <code>/end_session</code>.</li>
-    <li>Outputs <code>msg.sim_result</code>, <code>msg.sim_journal</code>, and sets <code>msg.payload</code>.</li>
-    <li>If <b>Prepare File Output</b> is enabled, <code>msg.file_output</code> and <code>msg.filename</code> are populated for downstream file nodes.</li>
-    <li><b>Parity/scripted rolls:</b> set <code>msg.roll_mode = "script"</code> or <code>msg.parity_mode = true</code> and supply <code>msg.dice_script</code> as an array of [d1,d2] pairs. Invalid scripts or short scripts raise clear errors.</li>
+    <li><b>API Config</b>: Node-RED config node with Engine endpoint and auth.</li>
+    <li><b>Rolls</b>: Number of rolls to simulate (default 100). <code>msg.rolls</code> overrides.</li>
+    <li><b>Strict Mode</b>: Enables stricter API validation.</li>
+    <li><b>Prepare File Output</b>: When enabled, prepares <code>msg.file_output</code> and <code>msg.filename</code> for downstream file writes.</li>
+    <li><b>Message fields</b>: requires <code>msg.strategy_config</code>; optional <code>msg.roll_mode = "script"</code>, <code>msg.parity_mode = true</code>, and <code>msg.dice_script</code> to drive scripted/parity rolls.</li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <p>Sets <code>msg.payload</code> to the final simulation result, adds <code>msg.sim_result</code> and <code>msg.sim_journal</code>, and includes file output fields when requested.</p>
+
+  <h3>Errors</h3>
+  <ul>
+    <li>Missing <code>msg.strategy_config</code> or API config.</li>
+    <li>Invalid dice scripts or mismatched roll counts when parity/script mode is active.</li>
+    <li>HTTP failures while calling <code>/session/start</code>, <code>/session/apply_action</code>, <code>/session/roll</code>, or <code>/end_session</code>.</li>
   </ul>
 </script>
 
 <script type="text/javascript">
   RED.nodes.registerType("craps-api-runner", {
-    category: "craps",
-    color: "#FFE6CC",
-    icon: "font-awesome/fa-play-circle",
+    category: "Craps: Execution",
+    color: "#6A4CCF",
+    icon: "icons/execution-node.svg",
     inputs: 1,
     outputs: 1,
     defaults: {
@@ -46,9 +59,10 @@
       prepare_file_output: { value: false },
       label: { value: "" }
     },
+    paletteLabel: "Run: Engine API Simulation",
     label: function() {
       if (this.label) return this.label;
-      return this.rolls ? `API runner (${this.rolls} rolls)` : "Craps API runner";
+      return this.rolls ? `Run: Engine API Simulation (${this.rolls} rolls)` : "Run: Engine API Simulation";
     }
   });
 </script>

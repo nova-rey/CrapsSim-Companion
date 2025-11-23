@@ -1,4 +1,4 @@
-<script type="text/html" data-template-name="craps-batch-runner">
+<script type="text/html" data-template-name="craps-batch-runner" data-label="Run: Batch Simulation">
   <div class="form-row">
     <label for="node-input-apiConfig"><i class="fa fa-cog"></i> API Config</label>
     <input type="text" id="node-input-apiConfig" placeholder="Select api config">
@@ -26,21 +26,34 @@
 </script>
 
 <script type="text/html" data-help-name="craps-batch-runner">
-  <p>Runs a compiled strategy_config across multiple seeds via the CrapsSim Engine HTTP API.</p>
+  <h3>What this node does</h3>
+  <p>Executes the compiled strategy across multiple seeded runs using the CrapsSim Engine API.</p>
+
+  <h3>Inputs</h3>
   <ul>
-    <li>Requires <code>msg.strategy_config</code> from the Strategy Compiler.</li>
-    <li>Seed config: <code>msg.seeds</code> (array), or <code>msg.seed_start</code> + <code>msg.seed_count</code> (contiguous range). <code>msg.rolls</code> overrides the node default.</li>
-    <li>Parity/scripted rolls: honor <code>msg.roll_mode = "script"</code> or <code>msg.parity_mode = true</code> plus <code>msg.dice_script</code> to reuse a dice script across runs.</li>
-    <li>Outputs <code>msg.batch_result</code> (per-run summaries) and <code>msg.batch_summary</code> (aggregates). <code>msg.payload</code> is the summary.</li>
-    <li>Stops on the first fatal run error and reports <code>msg.batch_error</code> with the failing seed/stage.</li>
+    <li><b>API Config</b>: Engine endpoint and auth via config node.</li>
+    <li><b>Rolls per run</b>: Default rolls per simulation (override with <code>msg.rolls</code>).</li>
+    <li><b>Seeds</b>: Provide <code>msg.seeds</code> (array) or <code>msg.seed_start</code> plus <code>msg.seed_count</code> to auto-generate a contiguous range. Node fields seed_start/seed_count serve as defaults.</li>
+    <li><b>Strict Mode</b>: Enables stricter validation.</li>
+    <li><b>Message fields</b>: requires <code>msg.strategy_config</code>; optional parity/script inputs via <code>msg.roll_mode</code>, <code>msg.parity_mode</code>, and <code>msg.dice_script</code>.</li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <p>Populates <code>msg.batch_result</code> (per-seed results), <code>msg.batch_summary</code> (aggregated totals), and sets <code>msg.payload</code> to the summary. Also surfaces <code>msg.batch_error</code> if a run fails.</p>
+
+  <h3>Errors</h3>
+  <ul>
+    <li>Missing <code>msg.strategy_config</code> or seed configuration.</li>
+    <li>HTTP errors during any run, stopping the batch on the first failure.</li>
+    <li>Invalid dice script when parity/script mode is active.</li>
   </ul>
 </script>
 
 <script type="text/javascript">
   RED.nodes.registerType("craps-batch-runner", {
-    category: "craps",
-    color: "#FFE6CC",
-    icon: "font-awesome/fa-tasks",
+    category: "Craps: Execution",
+    color: "#6A4CCF",
+    icon: "icons/execution-node.svg",
     inputs: 1,
     outputs: 1,
     defaults: {
@@ -51,10 +64,11 @@
       strict_mode: { value: false },
       label: { value: "" }
     },
+    paletteLabel: "Run: Batch Simulation",
     label: function() {
       if (this.label) return this.label;
       const seeds = this.seed_count ? `${this.seed_count} seeds` : "auto seeds";
-      return this.rolls ? `Batch (${seeds}, ${this.rolls} rolls)` : "Craps Batch runner";
+      return this.rolls ? `Run: Batch Simulation (${seeds}, ${this.rolls} rolls)` : "Run: Batch Simulation";
     }
   });
 </script>

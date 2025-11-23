@@ -1,31 +1,46 @@
-<script type="text/html" data-template-name="bet-in">
+<script type="text/html" data-template-name="bet-in" data-label="Bet Variable">
   <div class="form-row">
     <label for="node-input-betId"><i class="fa fa-link"></i> Bet ID</label>
     <input type="text" id="node-input-betId" placeholder="place6">
   </div>
   <div class="form-tips">
-    Connect <code>val-int</code> + <code>type.units/dollars</code> here. This node <b>stores</b> the latest amount+type for that Bet ID so a bet node can use it later.
+    Provide a Bet ID to latch <code>msg.value</code> (integer) and <code>msg.unitType</code> (unit|dollars) for downstream bet nodes.
   </div>
 </script>
 
 <script type="text/html" data-help-name="bet-in">
-  <p><b>bet-in</b>: Latches an incoming amount (<code>msg.value</code> integer) and type (<code>msg.unitType</code> = "unit"|"dollars") under a <b>Bet ID</b> in flow context.</p>
-  <p>Bet nodes (<code>bet-type</code>/<code>bet-prop</code>) can pull by the same Bet ID.</p>
-  <p>Status shows the latest latched value.</p>
+  <h3>What this node does</h3>
+  <p>Stores an incoming bet amount and unit type under a Bet ID so other betting nodes can reference it when configured to use a feed.</p>
+
+  <h3>Inputs</h3>
+  <ul>
+    <li><b>Bet ID</b>: Label to store the fed value.</li>
+    <li><b>Message fields</b>: <code>msg.value</code> (integer amount) and <code>msg.unitType</code> (<code>unit</code> or <code>dollars</code>). Optional <code>msg.var</code> metadata is preserved.</li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <p>No output wires. The value is saved in flow context (<code>__betFeed</code>) and status shows the latest amount and units.</p>
+
+  <h3>Errors</h3>
+  <ul>
+    <li>Missing Bet ID.</li>
+    <li>Non-integer <code>msg.value</code> or unsupported <code>msg.unitType</code> values.</li>
+  </ul>
 </script>
 
 <script type="text/javascript">
   RED.nodes.registerType("bet-in", {
-    category: "craps",
-    color: "#DDEBF7",
-    icon: "font-awesome/fa-sign-in",
+    category: "Craps: Strategy Builder",
+    color: "#64748B",
+    icon: "icons/utility-node.svg",
     defaults: {
       betId: { value: "", required: true }
     },
     inputs: 1,
     outputs: 0,
+    paletteLabel: "Bet Variable",
     label: function() {
-      return this.betId ? ("bet.in ("+this.betId+")") : "bet.in";
+      return this.betId ? `Bet Variable (${this.betId})` : "Bet Variable";
     }
   });
 </script>

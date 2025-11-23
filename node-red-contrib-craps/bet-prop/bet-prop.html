@@ -1,4 +1,4 @@
-<script type="text/html" data-template-name="bet-prop">
+<script type="text/html" data-template-name="bet-prop" data-label="Bet: Props/Hardways/Hops">
   <div class="form-row">
     <label for="node-input-propKind"><i class="fa fa-diamond"></i> Prop kind</label>
     <select id="node-input-propKind">
@@ -6,23 +6,11 @@
     </select>
   </div>
 
-  <div class="form-row hardway-only">
-    <label for="node-input-number"><i class="fa fa-hashtag"></i> Number</label>
-    <input type="number" id="node-input-number" placeholder="4,6,8,10 (Hardway only)">
-  </div>
-
   <div class="form-row">
-    <label for="node-input-betId"><i class="fa fa-tag"></i> Bet ID</label>
-    <input type="text" id="node-input-betId" placeholder="e.g. hard8 (optional)">
-  </div>
-
-  <hr>
-
-  <div class="form-row">
-    <label for="node-input-valueSource"><i class="fa fa-sliders"></i> Value Source</label>
+    <label for="node-input-valueSource"><i class="fa fa-sliders"></i> Amount source</label>
     <select id="node-input-valueSource">
-      <option value="fixed">fixed (enter amount here)</option>
-      <option value="feed">feed (from bet-in / vars)</option>
+      <option value="fixed">Fixed (enter amount)</option>
+      <option value="feed">Feed (from Bet Variable / vars)</option>
     </select>
   </div>
 
@@ -34,19 +22,53 @@
   <div class="form-row node-fixed-only">
     <label for="node-input-unitType"><i class="fa fa-balance-scale"></i> Units</label>
     <select id="node-input-unitType">
-      <option value="units">units</option>
       <option value="dollars">dollars</option>
+      <option value="units">units</option>
+    </select>
+  </div>
+
+  <div class="form-row hardway-only">
+    <label for="node-input-number"><i class="fa fa-hashtag"></i> Number</label>
+    <select id="node-input-number">
+      <option value=""></option>
+      <option value="4">4</option>
+      <option value="6">6</option>
+      <option value="8">8</option>
+      <option value="10">10</option>
     </select>
   </div>
 
   <div class="form-row">
+    <label for="node-input-betId"><i class="fa fa-tag"></i> Bet ID</label>
+    <input type="text" id="node-input-betId" placeholder="e.g. hard8 (optional)">
+  </div>
+
+  <div class="form-row">
     <label for="node-input-note"><i class="fa fa-sticky-note"></i> Note</label>
-    <input type="text" id="node-input-note" placeholder="optional (e.g., hop combination)">
+    <input type="text" id="node-input-note" placeholder="optional comment for this prop bet">
   </div>
 </script>
 
 <script type="text/html" data-help-name="bet-prop">
-  <p>Prop family. Hardway supports numbers (4/6/8/10). Others are one-roll props. Choose <b>fixed</b> or <b>feed</b> for amounts.</p>
+  <h3>What this node does</h3>
+  <p>Creates prop-family bet entries aligned with CrapsSim prop verbs. Current options support Hardway bets with required numbers.</p>
+
+  <h3>Inputs</h3>
+  <ul>
+    <li><b>Prop kind</b>: Hardway wagers on 4, 6, 8, or 10. The point selector only appears for Hardways.</li>
+    <li><b>Amount source</b>: <b>Fixed</b> uses the Amount and Units fields. <b>Feed</b> pulls amount+unit from <code>msg.var</code>, <code>msg.vars[betId]</code>, or <code>msg.amount/msg.unitType</code>.</li>
+    <li><b>Bet ID</b>/<b>Note</b>: Optional metadata applied to the generated bet step.</li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <p>Appends a prop bet step to <code>msg.recipe.steps</code> with the selected kind, amount, unitType, hardway number, and optional betId/note. The message continues downstream to Compile Strategy.</p>
+
+  <h3>Errors</h3>
+  <ul>
+    <li>Omitting a number for Hardway bets.</li>
+    <li>Using <b>Feed</b> without providing amount/unitType via message variables.</li>
+    <li>Selecting a prop kind not supported by the current CrapsSim bet surface.</li>
+  </ul>
 </script>
 
 <script type="text/javascript">
@@ -62,9 +84,9 @@
       $(".node-fixed-only")[show ? "show" : "hide"]();
     }
     RED.nodes.registerType("bet-prop", {
-      category: "craps",
-      color: "#E9F0FF",
-      icon: "font-awesome/fa-bolt",
+      category: "Craps: Strategy Builder",
+      color: "#4C8BF5",
+      icon: "icons/builder-node.svg",
       defaults: {
         propKind:    { value: "Hardway", required: true },
         number:      { value: "" },
@@ -82,6 +104,7 @@
         toggleHardway();
         toggleFixedFields();
       },
+      paletteLabel: "Bet: Props/Hardways/Hops",
       label: function() {
         const n  = (this.propKind === "Hardway" && this.number) ? ` ${this.number}` : "";
         const vs = this.valueSource === "fixed" ? ` ${this.amount} ${this.unitType}` : " (feed)";
