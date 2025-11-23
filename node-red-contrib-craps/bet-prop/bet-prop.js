@@ -9,16 +9,6 @@ module.exports = function(RED) {
         const hasHardwayPoint = hardwayNumbers.has(n) || allowedNumbers.has(n);
         switch (k) {
             case "hardway": return hasHardwayPoint ? `hardway_${n}` : null;
-            case "any7": return "prop_any7";
-            case "anycraps": return "prop_any_craps";
-            case "yo11": return "prop_yo11";
-            case "aces": return "prop_aces";
-            case "boxcars": return "prop_boxcars";
-            case "acedeuce": return "prop_ace_deuce";
-            case "horn": return "prop_horn";
-            case "hornhigh": return "prop_horn_high";
-            case "hop": return "prop_hop_generic";
-            case "prop": return "prop_other";
             default: return null;
         }
     }
@@ -70,7 +60,7 @@ module.exports = function(RED) {
                 if (!def) { node.error(`bet-prop: bet type '${canonical}' not found in catalog`); return done(); }
 
                 const number = Number.isFinite(numberRaw) ? numberRaw : (def.number !== undefined ? def.number : undefined);
-                if (def.family === "hardway" && !hardwayNumbers.has(Number(number))) {
+                if (def.requires_number && !hardwayNumbers.has(Number(number))) {
                     node.error(`bet-prop: number required for hardway bet '${canonical}'`);
                     return done();
                 }

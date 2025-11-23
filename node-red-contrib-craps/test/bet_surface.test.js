@@ -1,18 +1,42 @@
 const assert = require("assert");
-const { getBetDefinition, isSupported, validateCatalog } = require("../lib/bet_surface");
+const { listSupported, validateCatalog, getBetDefinition } = require("../lib/bet_surface");
+const { mapBetToApiAction } = require("../lib/bet_mapping");
+const { getVarTable } = require("../vanilla/legalizer");
 
 validateCatalog();
 
-const passLine = getBetDefinition("pass_line");
-assert(passLine, "pass_line should exist in catalog");
-assert.strictEqual(passLine.family, "line");
+const vt = getVarTable({ get: () => undefined }, {});
+const catalog = listSupported();
 
-const placeSix = getBetDefinition("place_6");
-assert(placeSix, "place_6 should exist in catalog");
-assert.strictEqual(placeSix.number, 6);
+assert(Array.isArray(catalog) && catalog.length > 0, "Catalog should contain supported bets");
 
-assert.strictEqual(isSupported("pass_line"), true, "pass_line should be supported");
-assert.strictEqual(isSupported("odds_pass_line"), false, "odds_pass_line should be marked unsupported");
-assert.strictEqual(isSupported("prop_any7"), false, "prop_any7 should be marked unsupported");
+for (const entry of catalog) {
+    assert(entry.key, "entry.key required");
+    assert(entry.family, "entry.family required");
+    assert(entry.engine_verb, "entry.engine_verb required");
+    assert(entry.label, "entry.label required");
+    assert(entry.ui_group, "entry.ui_group required");
+    assert(Array.isArray(entry.args_schema.required), "args_schema.required must be array");
+}
+
+const sampleBets = [
+    { key: "pass_line", base_amount: 10, unit_type: "units" },
+    { key: "dont_pass", base_amount: 10, unit_type: "units" },
+    { key: "field", base_amount: 5, unit_type: "dollars" },
+    { key: "place_6", base_amount: 12, unit_type: "dollars", number: 6 },
+    { key: "lay_4", base_amount: 15, unit_type: "dollars", number: 4 },
+    { key: "hardway_8", base_amount: 5, unit_type: "units", number: 8 }
+];
+
+for (const bet of sampleBets) {
+    const def = getBetDefinition(bet.key);
+    assert(def, `Definition missing for ${bet.key}`);
+    const action = mapBetToApiAction(bet, def, { varTable: vt });
+    assert.strictEqual(action.verb, def.engine_verb, "Engine verb should match catalog");
+    assert(action.args.amount > 0, "Amount should be positive after mapping");
+    if (def.requires_number) {
+        assert(action.args.number === bet.number || action.args.number === def.number, "Number should be carried through");
+    }
+}
 
 console.log("bet_surface catalog validation passed");

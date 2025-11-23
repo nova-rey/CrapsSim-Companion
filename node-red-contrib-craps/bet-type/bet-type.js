@@ -17,10 +17,6 @@ module.exports = function(RED) {
             case "field": return "field";
             case "place": return hasPoint ? `place_${n}` : null;
             case "lay": return hasPoint ? `lay_${n}` : null;
-            case "passodds": return "odds_pass_line";
-            case "dontpassodds": return "odds_dont_pass";
-            case "comeodds": return "odds_come";
-            case "dontcomeodds": return "odds_dont_come";
             default: return null;
         }
     }
@@ -71,7 +67,7 @@ module.exports = function(RED) {
                 if (!def) { node.error(`bet-type: bet type '${canonical}' not found in catalog`); return done(); }
 
                 const number = Number.isFinite(numberRaw) ? numberRaw : (def.number !== undefined ? def.number : undefined);
-                if (def.family && ["place", "lay", "hardway", "odds"].includes(def.family) && def.dynamic_point !== true) {
+                if (def.requires_number) {
                     if (!allowedNumbers.has(Number(number))) {
                         node.error(`bet-type: number required for ${def.family} bet '${canonical}'`);
                         return done();

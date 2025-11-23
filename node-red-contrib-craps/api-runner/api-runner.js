@@ -1,6 +1,7 @@
 const axios = require("axios");
 const { getBetDefinition } = require("../lib/bet_surface");
-const { getVarTable, dollarsFromUnitsOrLiteral, legalizeBetByType } = require("../vanilla/legalizer");
+const { getVarTable } = require("../vanilla/legalizer");
+const { mapBetToApiAction, UnknownBetError } = require("../lib/bet_mapping");
 
 function sanitizeInt(val) {
     const n = Number(val);
@@ -37,67 +38,16 @@ function buildEffectiveConfig(apiConfigNode, msg) {
 
 function mapBetToAction(bet, vt, logger) {
     const def = getBetDefinition(bet.key);
-    if (!def) {
-        logger && logger.warn && logger.warn(`api-runner: unknown bet key '${bet.key}'`);
+    try {
+        return mapBetToApiAction(bet, def, { varTable: vt, logger });
+    } catch (err) {
+        if (err instanceof UnknownBetError) {
+            logger && logger.warn && logger.warn(`api-runner: unknown bet key '${bet?.key}'`);
+            return null;
+        }
+        logger && logger.warn && logger.warn(`api-runner: skipping bet '${bet?.key}': ${err.message}`);
         return null;
     }
-
-    const baseAmount = Number(bet.base_amount);
-    if (!(baseAmount > 0) || !["units", "dollars"].includes(bet.unit_type)) {
-        logger && logger.warn && logger.warn(`api-runner: bet '${bet.key}' missing valid base_amount or unit_type`);
-        return null;
-    }
-
-    const num = bet.number != null ? Number(bet.number) : def.number;
-    const preDollars = dollarsFromUnitsOrLiteral(
-        bet.unit_type === "units" ? { units: baseAmount } : { dollars: baseAmount },
-        vt
-    );
-    const legalized = legalizeBetByType({ type: def.key, point: num }, preDollars, undefined, vt);
-    if (!(legalized > 0)) {
-        logger && logger.warn && logger.warn(`api-runner: bet '${bet.key}' resolved to non-positive dollars (${legalized})`);
-        return null;
-    }
-
-    const action = { verb: null, args: { amount: legalized } };
-
-    switch (def.family) {
-        case "line":
-            if (["pass_line", "dont_pass", "come", "dont_come"].includes(def.key)) {
-                action.verb = def.key;
-            }
-            break;
-        case "field":
-            action.verb = "field";
-            break;
-        case "place":
-            if (num) {
-                action.verb = "place";
-                action.args = { number: num, amount: legalized };
-            }
-            break;
-        case "lay":
-            if (num) {
-                action.verb = "lay";
-                action.args = { number: num, amount: legalized };
-            }
-            break;
-        case "hardway":
-            if (num) {
-                action.verb = "hardway";
-                action.args = { number: num, amount: legalized };
-            }
-            break;
-        default:
-            break;
-    }
-
-    if (!action.verb) {
-        logger && logger.warn && logger.warn(`api-runner: unsupported bet '${def.key}' for API runner`);
-        return null;
-    }
-
-    return { ...action, dollars: legalized };
 }
 
 async function doPost(client, baseUrl, path, data, timeout_ms, auth_token) {
