@@ -120,6 +120,88 @@ async function testStrictModeAbort() {
     console.log("api-runner strict mode abort path passed");
 }
 
+async function testParityModeHappy() {
+    const node = createNodeStub();
+    const apiConfig = { base_url: "http://127.0.0.1:8000", default_seed_mode: "fixed", seed: 7 };
+    const msg = defaultMsg();
+    msg.dice_script = [[3, 4], [1, 1]];
+    msg.roll_mode = "script";
+
+    nock(apiConfig.base_url).post("/session/start").reply(200, { session_id: "abc", bankroll: 200 });
+    nock(apiConfig.base_url).post("/session/apply_action").twice().reply(200, {});
+    const rollsSeen = [];
+    nock(apiConfig.base_url).post("/session/roll", (body) => {
+        rollsSeen.push(body.dice);
+        return true;
+    }).twice().reply(200, { bankroll: 210 });
+    nock(apiConfig.base_url).post("/end_session").reply(200, {});
+
+    const out = await runSimulation({
+        msg,
+        nodeConfig: { rolls: 2, strict_mode: false, prepare_file_output: false },
+        apiConfigNode: apiConfig,
+        node,
+        httpClient: require("axios")
+    });
+
+    assert.deepStrictEqual(rollsSeen, msg.dice_script);
+    assert.strictEqual(out.sim_result.rolls, 2);
+    console.log("api-runner parity mode happy path passed");
+}
+
+async function testParityExhaustion() {
+    const node = createNodeStub();
+    const apiConfig = { base_url: "http://127.0.0.1:8000", default_seed_mode: "fixed", seed: 7 };
+    const msg = defaultMsg();
+    msg.dice_script = [[3, 4]];
+    msg.roll_mode = "script";
+
+    nock(apiConfig.base_url).post("/session/start").reply(200, { session_id: "abc", bankroll: 200 });
+    nock(apiConfig.base_url).post("/session/apply_action").twice().reply(200, {});
+
+    let threw = false;
+    try {
+        await runSimulation({
+            msg,
+            nodeConfig: { rolls: 2, strict_mode: false, prepare_file_output: false },
+            apiConfigNode: apiConfig,
+            node,
+            httpClient: require("axios")
+        });
+    } catch (err) {
+        threw = true;
+        assert(msg.api_error);
+        assert.strictEqual(msg.api_error.stage, "roll");
+    }
+    assert(threw, "expected exhaustion to throw");
+    console.log("api-runner parity exhaustion path passed");
+}
+
+async function testParityValidationFailure() {
+    const node = createNodeStub();
+    const apiConfig = { base_url: "http://127.0.0.1:8000", default_seed_mode: "fixed", seed: 7 };
+    const msg = defaultMsg();
+    msg.dice_script = ["bad_entry"];
+    msg.roll_mode = "script";
+
+    let threw = false;
+    try {
+        await runSimulation({
+            msg,
+            nodeConfig: { rolls: 1, strict_mode: false, prepare_file_output: false },
+            apiConfigNode: apiConfig,
+            node,
+            httpClient: require("axios")
+        });
+    } catch (err) {
+        threw = true;
+        assert(msg.api_error);
+        assert.strictEqual(msg.api_error.stage, "preflight");
+    }
+    assert(threw, "expected validation to throw");
+    console.log("api-runner parity validation failure path passed");
+}
+
 async function testHttpFailure() {
     const node = createNodeStub();
     const apiConfig = { base_url: "http://127.0.0.1:8000" };
@@ -154,6 +236,12 @@ async function testHttpFailure() {
         await testStrictModeAbort();
         nock.cleanAll();
         await testHttpFailure();
+        nock.cleanAll();
+        await testParityModeHappy();
+        nock.cleanAll();
+        await testParityExhaustion();
+        nock.cleanAll();
+        await testParityValidationFailure();
     } catch (err) {
         console.error(err);
         process.exit(1);

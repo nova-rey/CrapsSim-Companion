@@ -1,0 +1,58 @@
+<script type="text/html" data-template-name="craps-batch-runner">
+  <div class="form-row">
+    <label for="node-input-apiConfig"><i class="fa fa-cog"></i> API Config</label>
+    <input type="text" id="node-input-apiConfig" placeholder="Select api config">
+  </div>
+  <div class="form-row">
+    <label for="node-input-rolls"><i class="fa fa-repeat"></i> Rolls per run</label>
+    <input type="number" id="node-input-rolls" placeholder="100">
+  </div>
+  <div class="form-row">
+    <label for="node-input-seed_start"><i class="fa fa-sort-numeric-asc"></i> Seed start</label>
+    <input type="number" id="node-input-seed_start" placeholder="1000">
+  </div>
+  <div class="form-row">
+    <label for="node-input-seed_count"><i class="fa fa-calculator"></i> Seed count</label>
+    <input type="number" id="node-input-seed_count" placeholder="10">
+  </div>
+  <div class="form-row">
+    <label for="node-input-strict_mode"><i class="fa fa-exclamation-triangle"></i> Strict Mode</label>
+    <input type="checkbox" id="node-input-strict_mode">
+  </div>
+  <div class="form-row">
+    <label for="node-input-label"><i class="fa fa-tag"></i> Label</label>
+    <input type="text" id="node-input-label" placeholder="optional label">
+  </div>
+</script>
+
+<script type="text/html" data-help-name="craps-batch-runner">
+  <p>Runs a compiled strategy_config across multiple seeds via the CrapsSim Engine HTTP API.</p>
+  <ul>
+    <li>Requires <code>msg.strategy_config</code> from the Strategy Compiler.</li>
+    <li>Message overrides: <code>msg.seeds</code> (array), or <code>msg.seed_start</code> + <code>msg.seed_count</code>, and <code>msg.rolls</code>.</li>
+    <li>Outputs <code>msg.batch_result</code> (per-run summaries) and <code>msg.batch_summary</code> (aggregates). <code>msg.payload</code> is the summary.</li>
+  </ul>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType("craps-batch-runner", {
+    category: "craps",
+    color: "#FFE6CC",
+    icon: "font-awesome/fa-tasks",
+    inputs: 1,
+    outputs: 1,
+    defaults: {
+      apiConfig: { value: "", type: "craps-api-config", required: true },
+      rolls: { value: 100 },
+      seed_start: { value: "" },
+      seed_count: { value: "" },
+      strict_mode: { value: false },
+      label: { value: "" }
+    },
+    label: function() {
+      if (this.label) return this.label;
+      const seeds = this.seed_count ? `${this.seed_count} seeds` : "auto seeds";
+      return this.rolls ? `Batch (${seeds}, ${this.rolls} rolls)` : "Craps Batch runner";
+    }
+  });
+</script>

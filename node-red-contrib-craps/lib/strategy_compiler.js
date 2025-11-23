@@ -82,7 +82,8 @@ function compileStrategyConfig({
             unit_type: unitType,
             number: number ?? null,
             bet_id: step.betId ?? step.bet_id ?? null,
-            note: step.note ?? null
+            note: step.note ?? null,
+            working: step.working ?? null
         });
     }
 

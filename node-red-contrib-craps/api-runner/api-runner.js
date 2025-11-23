@@ -1,7 +1,6 @@
 const axios = require("axios");
-const { getBetDefinition } = require("../lib/bet_surface");
 const { getVarTable } = require("../vanilla/legalizer");
-const { mapBetToApiAction, UnknownBetError } = require("../lib/bet_mapping");
+const { runStrategyViaApi, mapBetToAction, extractSessionId, extractBankroll } = require("../lib/api_runner_core");
 
 function sanitizeInt(val) {
     const n = Number(val);
@@ -36,45 +35,6 @@ function buildEffectiveConfig(apiConfigNode, msg) {
     return { base_url, profile_id, default_seed_mode, seed, timeout_ms, retries, retry_backoff_ms, auth_token };
 }
 
-function mapBetToAction(bet, vt, logger) {
-    const def = getBetDefinition(bet.key);
-    try {
-        return mapBetToApiAction(bet, def, { varTable: vt, logger });
-    } catch (err) {
-        if (err instanceof UnknownBetError) {
-            logger && logger.warn && logger.warn(`api-runner: unknown bet key '${bet?.key}'`);
-            return null;
-        }
-        logger && logger.warn && logger.warn(`api-runner: skipping bet '${bet?.key}': ${err.message}`);
-        return null;
-    }
-}
-
-async function doPost(client, baseUrl, path, data, timeout_ms, auth_token) {
-    const url = `${baseUrl.replace(/\/$/, "")}${path}`;
-    const headers = { "Content-Type": "application/json" };
-    if (auth_token) headers["Authorization"] = `Bearer ${auth_token}`;
-    const res = await client.post(url, data, { timeout: timeout_ms, headers });
-    return res.data;
-}
-
-function extractSessionId(payload) {
-    if (!payload) return null;
-    if (payload.session_id) return payload.session_id;
-    if (payload.sessionId) return payload.sessionId;
-    if (payload.session?.id) return payload.session.id;
-    if (payload.data?.session?.id) return payload.data.session.id;
-    return null;
-}
-
-function extractBankroll(payload) {
-    if (!payload || typeof payload !== "object") return null;
-    if (payload.bankroll !== undefined) return payload.bankroll;
-    if (payload.session?.bankroll !== undefined) return payload.session.bankroll;
-    if (payload.data?.bankroll !== undefined) return payload.data.bankroll;
-    return null;
-}
-
 async function runSimulation({
     msg,
     nodeConfig,
@@ -82,8 +42,6 @@ async function runSimulation({
     node,
     httpClient = axios
 }) {
-    const errors = [];
-
     if (!msg.strategy_config) {
         const errMsg = "api-runner: missing msg.strategy_config";
         node?.error && node.error(errMsg, msg);
@@ -115,159 +73,49 @@ async function runSimulation({
     const targetRolls = sanitizeInt(msg.rolls) || sanitizeInt(msg.runs) || Number(nodeConfig.rolls) || 100;
     const strict_mode = Boolean(nodeConfig.strict_mode);
     const prepare_file_output = Boolean(nodeConfig.prepare_file_output);
+    const roll_mode = msg.roll_mode || (msg.parity_mode ? "script" : undefined);
 
-    let sessionId = null;
-    let bankroll_start = null;
-    let bankroll_end = null;
-
-    const startPayload = { seed: effective_seed, profile_id: effective_profile_id };
-
-    let startResp;
     try {
-        startResp = await doPost(httpClient, base_url, "/session/start", startPayload, effective_timeout_ms, effConfig.auth_token);
-    } catch (err) {
-        msg.api_error = {
-            stage: "start",
-            error: err.message,
-            statusCode: err.response?.status,
-            responseBody: err.response?.data
+        const result = await runStrategyViaApi({
+            strategyConfig,
+            apiConfig: {
+                base_url,
+                profile_id: effective_profile_id,
+                seed: effective_seed,
+                timeout_ms: effective_timeout_ms,
+                auth_token: effConfig.auth_token
+            },
+            varTable: vt,
+            rolls: targetRolls,
+            strict_mode,
+            prepare_file_output,
+            roll_mode,
+            parity_mode: msg.parity_mode,
+            dice_script: msg.dice_script,
+            httpClient,
+            logger: node
+        });
+
+        const strategy_name = strategyConfig.strategy_name || nodeConfig.label || result.sim_result.strategy_name;
+        msg.sim_result = {
+            ...result.sim_result,
+            strategy_name
         };
-        node?.error && node.error("Engine API HTTP error at start", msg);
-        const e = new Error("start failed");
-        e.fatal = true;
-        throw e;
-    }
-
-    sessionId = extractSessionId(startResp);
-    bankroll_start = extractBankroll(startResp);
-
-    if (!sessionId) {
-        const errMsg = "api-runner: session_id missing from start response";
-        node?.error && node.error(errMsg, msg);
-        const e = new Error(errMsg);
-        e.fatal = true;
-        throw e;
-    }
-
-    const journal = [];
-
-    for (const bet of strategyConfig.bets || []) {
-        const action = mapBetToAction(bet, vt, node);
-        if (!action) continue;
-        let resp;
-        try {
-            resp = await doPost(httpClient, base_url, "/session/apply_action", {
-                session_id: sessionId,
-                verb: action.verb,
-                args: action.args
-            }, effective_timeout_ms, effConfig.auth_token);
-        } catch (err) {
-            msg.api_error = {
-                stage: "apply_action",
-                error: err.message,
-                statusCode: err.response?.status,
-                responseBody: err.response?.data
-            };
-            node?.error && node.error("Engine API HTTP error at apply_action", msg);
-            const e = new Error("apply_action failed");
-            e.fatal = true;
-            throw e;
+        msg.sim_result.seed = effective_seed;
+        msg.sim_result.profile_id = effective_profile_id;
+        msg.sim_journal = result.sim_journal;
+        msg.payload = msg.sim_result;
+        if (prepare_file_output) {
+            msg.file_output = result.file_output;
+            msg.filename = result.filename;
         }
-
-        const respErrors = Array.isArray(resp?.errors) ? resp.errors : [];
-        if (respErrors.length) errors.push(...respErrors);
-        if (strict_mode && respErrors.length) {
-            break;
-        }
-    }
-
-    let rolled = 0;
-    let aborted = strict_mode && errors.length > 0;
-    if (!aborted) {
-        for (let i = 1; i <= targetRolls; i++) {
-            let resp;
-            try {
-                resp = await doPost(httpClient, base_url, "/session/roll", { session_id: sessionId }, effective_timeout_ms, effConfig.auth_token);
-            } catch (err) {
-                msg.api_error = {
-                    stage: "roll",
-                    error: err.message,
-                    statusCode: err.response?.status,
-                    responseBody: err.response?.data
-                };
-                node?.error && node.error("Engine API HTTP error at roll", msg);
-                const e = new Error("roll failed");
-                e.fatal = true;
-                throw e;
-            }
-
-            rolled = i;
-            const respErrors = Array.isArray(resp?.errors) ? resp.errors : [];
-            if (respErrors.length) errors.push(...respErrors);
-            journal.push({
-                index: i,
-                ...resp
-            });
-
-            if (resp && resp.bankroll !== undefined) bankroll_end = resp.bankroll;
-            if (strict_mode && respErrors.length) {
-                aborted = true;
-                break;
-            }
-        }
-    }
-
-    let endSessionSummary = null;
-    try {
-        endSessionSummary = await doPost(httpClient, base_url, "/end_session", { session_id: sessionId }, effective_timeout_ms, effConfig.auth_token);
-        if (endSessionSummary && endSessionSummary.bankroll !== undefined && bankroll_end === null) {
-            bankroll_end = endSessionSummary.bankroll;
-        }
+        return msg;
     } catch (err) {
-        node?.warn && node.warn(`api-runner: end_session failed - ${err.message}`);
-    }
-
-    if (bankroll_end === null) {
-        const last = journal[journal.length - 1];
-        if (last && last.bankroll !== undefined) bankroll_end = last.bankroll;
-    }
-
-    if (bankroll_start === null) {
-        const first = startResp && extractBankroll(startResp);
-        if (first !== null) bankroll_start = first;
-    }
-
-    const net = (bankroll_end != null && bankroll_start != null) ? bankroll_end - bankroll_start : null;
-    const rolls_executed = journal.length;
-    const ev_per_roll = (net != null && rolls_executed > 0) ? net / rolls_executed : null;
-
-    const strategy_name = strategyConfig.strategy_name || nodeConfig.label || "unnamed_strategy";
-
-    msg.sim_result = {
-        strategy_name,
-        seed: effective_seed,
-        profile_id: effective_profile_id,
-        rolls: rolls_executed,
-        bankroll_start,
-        bankroll_end,
-        net,
-        ev_per_roll,
-        errors,
-        end_summary: endSessionSummary || null
-    };
-    msg.sim_journal = journal;
-    msg.payload = msg.sim_result;
-
-    if (prepare_file_output) {
-        const fileOutput = journal.map(entry => JSON.stringify(entry)).join("\n");
-        msg.file_output = fileOutput;
-        if (!msg.filename) {
-            const safeName = (strategy_name || "strategy").toString().replace(/[^\w.-]+/g, "_");
-            msg.filename = `${safeName}_${effective_seed}_journal.ndjson`;
+        if (err.api_error) {
+            msg.api_error = err.api_error;
         }
+        throw err;
     }
-
-    return msg;
 }
 
 module.exports = function(RED) {

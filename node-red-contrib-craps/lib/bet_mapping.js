@@ -26,6 +26,16 @@ function ensureNumberAllowed(number, requires_number) {
     return true;
 }
 
+function deriveOddsBase(key) {
+    switch (key) {
+        case "odds_pass_line": return "pass_line";
+        case "odds_dont_pass": return "dont_pass";
+        case "odds_come": return "come";
+        case "odds_dont_come": return "dont_come";
+        default: return null;
+    }
+}
+
 function normalizeAmount(betEntry, varTable) {
     const baseAmount = Number(betEntry.base_amount);
     const unitType = betEntry.unit_type;
@@ -55,14 +65,32 @@ function mapBetToApiAction(betEntry, catalogEntry, { varTable, logger } = {}) {
     }
 
     const preDollars = normalizeAmount(betEntry, varTable);
-    const legalized = legalizeBetByType({ type: catalogEntry.key, point: number }, preDollars, undefined, varTable);
+    const legalizeType = catalogEntry.family === "odds" ? deriveOddsBase(catalogEntry.key) : catalogEntry.key;
+    const legalized = legalizeBetByType({ type: legalizeType, point: number }, preDollars, undefined, varTable);
     if (!(legalized > 0)) {
         throw new Error(`bet '${catalogEntry.key}' resolved to non-positive dollars after legalization`);
     }
 
     const args = { amount: legalized };
-    if (number !== undefined && number !== null && catalogEntry.requires_number) {
-        args.number = Number(number);
+    if (catalogEntry.family === "odds") {
+        const base = deriveOddsBase(catalogEntry.key);
+        if (!base) {
+            throw new Error(`bet '${catalogEntry.key}' has no odds base mapping`);
+        }
+        args.base = base;
+        if (catalogEntry.requires_number) {
+            if (!ensureNumberAllowed(number, catalogEntry.requires_number)) {
+                throw new Error(`bet '${catalogEntry.key}' requires a valid number`);
+            }
+            args.number = Number(number);
+        }
+        if (betEntry.working !== undefined) {
+            args.working = Boolean(betEntry.working);
+        }
+    } else {
+        if (number !== undefined && number !== null && catalogEntry.requires_number) {
+            args.number = Number(number);
+        }
     }
 
     return {
@@ -78,6 +106,9 @@ function mapBetToApiAction(betEntry, catalogEntry, { varTable, logger } = {}) {
 function mapBetToVanillaSpec(betEntry, catalogEntry, { varTable } = {}) {
     if (!catalogEntry) {
         throw new UnknownBetError(`Unknown bet key '${betEntry?.key}'`);
+    }
+    if (catalogEntry.family === "odds") {
+        throw new Error("Odds bets are not yet supported in vanilla exporter");
     }
     const number = resolveNumber(betEntry, catalogEntry);
     if (catalogEntry.requires_number && !ensureNumberAllowed(number, catalogEntry.requires_number)) {

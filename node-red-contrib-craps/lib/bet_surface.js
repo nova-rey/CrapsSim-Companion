@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const allowedFamilies = new Set(["line", "place", "lay", "field", "hardway"]);
+const allowedFamilies = new Set(["line", "place", "lay", "field", "hardway", "odds"]);
 const allowedNumbers = new Set([4, 5, 6, 8, 9, 10]);
 
 let catalogCache = null;
@@ -29,13 +29,10 @@ function validateRequiresNumber(entry, ctx) {
     if (requires_number === undefined) return { requires_number: false, number };
     if (requires_number === false) return { requires_number: false, number };
     if (requires_number === true) {
-        if (number === undefined || number === null) {
-            throw new Error(`${ctx}: requires_number=true requires a number field`);
-        }
-        if (!allowedNumbers.has(Number(number))) {
+        if (number !== undefined && number !== null && !allowedNumbers.has(Number(number))) {
             throw new Error(`${ctx}: number '${number}' is not allowed`);
         }
-        return { requires_number: true, number: Number(number) };
+        return { requires_number: true, number: number !== undefined ? Number(number) : undefined };
     }
     if (Array.isArray(requires_number)) {
         const normalized = requires_number.map(n => Number(n));

@@ -32,6 +32,42 @@
     "args_schema": { "required": ["amount"], "optional": [] }
   },
   {
+    "key": "odds_pass_line",
+    "family": "odds",
+    "engine_verb": "odds",
+    "label": "Pass Odds",
+    "ui_group": "main",
+    "requires_number": false,
+    "args_schema": { "required": ["amount"], "optional": ["number", "working"] }
+  },
+  {
+    "key": "odds_dont_pass",
+    "family": "odds",
+    "engine_verb": "odds",
+    "label": "Don't Pass Odds",
+    "ui_group": "main",
+    "requires_number": false,
+    "args_schema": { "required": ["amount"], "optional": ["number", "working"] }
+  },
+  {
+    "key": "odds_come",
+    "family": "odds",
+    "engine_verb": "odds",
+    "label": "Come Odds",
+    "ui_group": "main",
+    "requires_number": true,
+    "args_schema": { "required": ["amount"], "optional": ["number", "working"] }
+  },
+  {
+    "key": "odds_dont_come",
+    "family": "odds",
+    "engine_verb": "odds",
+    "label": "Don't Come Odds",
+    "ui_group": "main",
+    "requires_number": true,
+    "args_schema": { "required": ["amount"], "optional": ["number", "working"] }
+  },
+  {
     "key": "field",
     "family": "field",
     "engine_verb": "field",

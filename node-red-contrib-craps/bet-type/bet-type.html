@@ -6,15 +6,24 @@
       <option value="DontPass">DontPass</option>
       <option value="Come">Come</option>
       <option value="DontCome">DontCome</option>
+      <option value="PassOdds">Pass Odds</option>
+      <option value="DontPassOdds">Don't Pass Odds</option>
+      <option value="ComeOdds">Come Odds</option>
+      <option value="DontComeOdds">Don't Come Odds</option>
       <option value="Field">Field</option>
       <option value="Place">Place</option>
       <option value="Lay">Lay</option>
     </select>
   </div>
 
-  <div class="form-row">
+  <div class="form-row" id="node-input-number-row">
     <label for="node-input-number"><i class="fa fa-hashtag"></i> Number</label>
     <input type="number" id="node-input-number" placeholder="4,5,6,8,9,10 (when applicable)">
+  </div>
+
+  <div class="form-row" id="node-input-working-row">
+    <label for="node-input-working"><i class="fa fa-bell"></i> Working on come-out</label>
+    <input type="checkbox" id="node-input-working">
   </div>
 
   <div class="form-row">
@@ -55,37 +64,49 @@
   <p>Line/Place/Lay/Field. Choose <b>fixed</b> to enter amount + units here, or <b>feed</b> to read from <code>bet-in</code> / <code>msg.vars[betId]</code> / <code>msg.var</code>.</p>
 </script>
 
-<script type="text/javascript">
-  (function(){
-    function toggleFixedFields() {
-      const v = $("#node-input-valueSource").val();
-      const show = (v === "fixed");
-      $(".node-fixed-only")[show ? "show" : "hide"]();
-    }
-    RED.nodes.registerType("bet-type", {
-      category: "craps",
-      color: "#FDEDD0",
-      icon: "font-awesome/fa-dollar",
-      defaults: {
-        kind:        { value: "Pass", required: true },
-        number:      { value: "" },
-        betId:       { value: "" },
-        valueSource: { value: "fixed", required: true },
-        amount:      { value: 0 },
-        unitType:    { value: "units" },
-        note:        { value: "" }
-      },
-      inputs: 1,
-      outputs: 1,
-      oneditprepare: function(){
-        $("#node-input-valueSource").on("change", toggleFixedFields);
-        toggleFixedFields();
-      },
-      label: function() {
-        const n  = this.number ? ` ${this.number}` : "";
-        const vs = this.valueSource === "fixed" ? ` ${this.amount} ${this.unitType}` : " (feed)";
-        return `${this.kind}${n}${vs}`;
+  <script type="text/javascript">
+    (function(){
+      function toggleFixedFields() {
+        const v = $("#node-input-valueSource").val();
+        const show = (v === "fixed");
+        $(".node-fixed-only")[show ? "show" : "hide"]();
+
+        const kind = $("#node-input-kind").val();
+        const needsNumber = ["Place", "Lay", "ComeOdds", "DontComeOdds"].includes(kind);
+        const isOdds = ["PassOdds", "DontPassOdds", "ComeOdds", "DontComeOdds"].includes(kind);
+
+        $("#node-input-number-row")[needsNumber ? "show" : "hide"]();
+        $("#node-input-working-row")[isOdds ? "show" : "hide"]();
       }
-    });
-  })();
-</script>
+      function labelWorkingSuffix(ctx) {
+        return ctx.working ? " (work)" : "";
+      }
+      RED.nodes.registerType("bet-type", {
+        category: "craps",
+        color: "#FDEDD0",
+        icon: "font-awesome/fa-dollar",
+        defaults: {
+          kind:        { value: "Pass", required: true },
+          number:      { value: "" },
+          betId:       { value: "" },
+          valueSource: { value: "fixed", required: true },
+          amount:      { value: 0 },
+          unitType:    { value: "units" },
+          note:        { value: "" },
+          working:     { value: false }
+        },
+        inputs: 1,
+        outputs: 1,
+        oneditprepare: function(){
+          $("#node-input-valueSource").on("change", toggleFixedFields);
+          $("#node-input-kind").on("change", toggleFixedFields);
+          toggleFixedFields();
+        },
+        label: function() {
+          const n  = this.number ? ` ${this.number}` : "";
+          const vs = this.valueSource === "fixed" ? ` ${this.amount} ${this.unitType}` : " (feed)";
+          return `${this.kind}${n}${vs}${labelWorkingSuffix(this)}`;
+        }
+      });
+    })();
+  </script>
