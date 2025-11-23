@@ -1,4 +1,4 @@
-Node-RED Contrib Craps (Vanilla)
+Node-RED Contrib Craps (Vanilla + Engine API)
 
 A collection of custom Node-RED nodes for designing, validating, and exporting Craps betting strategies.
 
@@ -39,6 +39,8 @@ Phase 1 targets the current CrapsSim vanilla/API bet surface that exposes `BetPa
 - `examples/hardway_example_flow.json`: Hardway 6 and Hardway 8 via `bet-prop`.
 - `examples/strategy_simple_line_place.json`: Minimal Pass Line + Place 6/8 feeding strategy-compiler → export-vanilla with debug taps for `msg.strategy_config` and the exported Python.
 - `examples/strategy_hardway_demo.json`: Hardway 6/8 demonstrating how `bet-prop` → strategy-compiler → export-vanilla produces hardway bets in `strategy_config`.
+- `examples/api_simple_line_place.json`: Simple Engine API run for Pass Line + Place 6/8 with debug taps for `sim_result` and `sim_journal`.
+- `examples/api_with_file_output.json`: Engine API run with file-ready NDJSON journal wired into the standard Node-RED File node.
 
 ## What is `strategy_config`?
 
@@ -54,7 +56,7 @@ You usually do not edit `strategy_config` by hand; it is produced automatically.
     { "key": "pass_line", "base_amount": 10, "unit_type": "units" },
     { "key": "place_6", "base_amount": 12, "unit_type": "dollars", "number": 6 }
   ],
-  "metadata": { "created_by": "node-red-contrib-craps", "version": "1.2.0", "notes": "optional" }
+  "metadata": { "created_by": "node-red-contrib-craps", "version": "1.3.0", "notes": "optional" }
 }
 ```
 
@@ -65,6 +67,48 @@ Exporters and runners read `strategy_config` to build CrapsSim components. Amoun
 - **Inputs:** Expects `msg.recipe.steps` (emitted by bet nodes), plus optional `msg.varTable` and metadata (e.g., `msg.strategy_name`, `msg.strategy_notes`).
 - **Outputs:** Writes `msg.strategy_config` (and also `msg.payload`) containing the normalized strategy and table info.
 - **Usage:** Wire bet nodes → `strategy-compiler` → exporters/runners. You generally don’t need to know the internal schema beyond that; the node handles normalization and validation for you.
+
+## Engine API Runner (Phase 3)
+
+The Engine API Runner executes a compiled `strategy_config` against a running CrapsSim Engine HTTP API (e.g., `uvicorn crapssim_api.http:app`). It complements the vanilla exporter path—you can still export local Python files, or you can hit the HTTP API for immediate simulation feedback.
+
+Typical flow: `bet` nodes → **Strategy Compiler** → **API Runner** → Debug/File.
+
+### craps-api-config (config node)
+
+Holds shared Engine API defaults so individual flows don’t have to repeat them:
+
+- **base_url**: API host, e.g., `http://127.0.0.1:8000`.
+- **profile_id**: Profile to send to `/session/start` (default: `default`).
+- **default_seed_mode**: `fixed`, `random`, or `from_msg`.
+- **seed**: Used when `default_seed_mode` is `fixed`.
+- **timeout_ms**: Per-request timeout.
+- **retries/retry_backoff_ms**: Exposed for future use; currently plumbed through the config object.
+- **auth_token**: Optional bearer token for protected deployments.
+
+Override behavior: `msg.api_config` can override most fields, and `msg.profile_id`/`msg.seed` take precedence when provided. With `default_seed_mode: from_msg`, the runner pulls seeds from `msg.seed` (falling back to a timestamp when missing).
+
+### api-runner node
+
+- **Inputs:** Requires `msg.strategy_config` from the Strategy Compiler. Optional overrides: `msg.seed`, `msg.rolls`/`msg.runs`, `msg.profile_id`, `msg.api_config`.
+- **Calls:** `/session/start` → `/session/apply_action` (for each bet) → `/session/roll` (for configured roll count) → `/end_session`.
+- **Outputs:**
+  - `msg.sim_result`: Summary with `strategy_name`, `seed`, `profile_id`, `rolls`, bankroll start/end, `net`, `ev_per_roll`, and aggregated `errors`.
+  - `msg.sim_journal`: Roll-by-roll responses from the Engine API.
+  - `msg.payload`: Defaults to `sim_result` for dashboards.
+  - When **Prepare File Output** is enabled: `msg.file_output` (NDJSON string) and `msg.filename` (auto-generated when not provided) for downstream File nodes.
+- **Config options:**
+  - **rolls**: Default roll count when `msg.rolls`/`msg.runs` is absent.
+  - **strict_mode**: When true, aborts on the first non-empty API `errors` array; when false, aggregates errors but keeps running.
+  - **prepare_file_output**: Prepares NDJSON journal and filename, but leaves actual disk I/O to a File node.
+
+### API Runner walkthrough
+
+1. Start the Engine API locally: `uvicorn crapssim_api.http:app --reload` (or your deployment of choice).
+2. Import `examples/api_simple_line_place.json` into Node-RED.
+3. Open the `craps-api-config` node in the flow and confirm `base_url` matches your running API.
+4. Press the Inject node to trigger the flow.
+5. Watch `sim_result` in the debug sidebar. If you also import `examples/api_with_file_output.json`, the journal arrives in `msg.file_output` and is written by the File node (path set in the example).
 
 📦 Nodes
 🎲 Bet Construction

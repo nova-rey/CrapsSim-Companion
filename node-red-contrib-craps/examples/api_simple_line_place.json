@@ -1,0 +1,179 @@
+[
+  {
+    "id": "d28d1730b9c4a942",
+    "type": "tab",
+    "label": "API Simple Line + Place",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "f9b792e4cce391b7",
+    "type": "comment",
+    "z": "d28d1730b9c4a942",
+    "name": "Simple API example",
+    "info": "Simple API example: Pass Line + Place 6/8, compiled via Strategy Compiler, run through Engine API, summary to debug.",
+    "x": 240,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "3a5d6e3a0383264b",
+    "type": "inject",
+    "z": "d28d1730b9c4a942",
+    "name": "start",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "str",
+    "x": 120,
+    "y": 120,
+    "wires": [
+      [
+        "e6c6fc9f7b87d5c3"
+      ]
+    ]
+  },
+  {
+    "id": "e6c6fc9f7b87d5c3",
+    "type": "bet-type",
+    "z": "d28d1730b9c4a942",
+    "kind": "Pass",
+    "number": "",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "10",
+    "unitType": "units",
+    "note": "",
+    "x": 320,
+    "y": 120,
+    "wires": [
+      [
+        "e5416189a899f8d4"
+      ]
+    ]
+  },
+  {
+    "id": "e5416189a899f8d4",
+    "type": "bet-type",
+    "z": "d28d1730b9c4a942",
+    "kind": "Place",
+    "number": "6",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "12",
+    "unitType": "units",
+    "note": "",
+    "x": 540,
+    "y": 120,
+    "wires": [
+      [
+        "ee6ab81fb33c30af"
+      ]
+    ]
+  },
+  {
+    "id": "ee6ab81fb33c30af",
+    "type": "bet-type",
+    "z": "d28d1730b9c4a942",
+    "kind": "Place",
+    "number": "8",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "12",
+    "unitType": "units",
+    "note": "",
+    "x": 760,
+    "y": 120,
+    "wires": [
+      [
+        "7b297178d280b781"
+      ]
+    ]
+  },
+  {
+    "id": "7b297178d280b781",
+    "type": "strategy-compiler",
+    "z": "d28d1730b9c4a942",
+    "strategyName": "API_Line_Place",
+    "notes": "",
+    "x": 990,
+    "y": 120,
+    "wires": [
+      [
+        "1ac1edc27d1f35a5"
+      ]
+    ]
+  },
+  {
+    "id": "1ac1edc27d1f35a5",
+    "type": "craps-api-runner",
+    "z": "d28d1730b9c4a942",
+    "apiConfig": "1d58c4f73f2eac9f",
+    "rolls": "10",
+    "strict_mode": false,
+    "prepare_file_output": false,
+    "label": "Engine API runner",
+    "x": 1230,
+    "y": 120,
+    "wires": [
+      [
+        "f9f7f4597e1bcc83",
+        "25f694ae68a7f73f"
+      ]
+    ]
+  },
+  {
+    "id": "f9f7f4597e1bcc83",
+    "type": "debug",
+    "z": "d28d1730b9c4a942",
+    "name": "sim_result",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "sim_result",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1460,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "25f694ae68a7f73f",
+    "type": "debug",
+    "z": "d28d1730b9c4a942",
+    "name": "sim_journal",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "sim_journal",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1460,
+    "y": 140,
+    "wires": []
+  },
+  {
+    "id": "1d58c4f73f2eac9f",
+    "type": "craps-api-config",
+    "base_url": "http://127.0.0.1:8000",
+    "profile_id": "default",
+    "default_seed_mode": "random",
+    "seed": "",
+    "timeout_ms": 5000,
+    "retries": 0,
+    "retry_backoff_ms": 0,
+    "auth_token": ""
+  }
+]

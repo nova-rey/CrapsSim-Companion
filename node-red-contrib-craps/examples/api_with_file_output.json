@@ -1,0 +1,222 @@
+[
+  {
+    "id": "64e7d6d8f5a3623e",
+    "type": "tab",
+    "label": "API with File Output",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "261edb3ec989756e",
+    "type": "comment",
+    "z": "64e7d6d8f5a3623e",
+    "name": "API runner with NDJSON output",
+    "info": "API Runner example with file output: strategy → API → journal prepared as NDJSON in msg.file_output → written by standard Node-RED file node.",
+    "x": 310,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "f7e79e12e4c3b7c5",
+    "type": "inject",
+    "z": "64e7d6d8f5a3623e",
+    "name": "start",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "str",
+    "x": 120,
+    "y": 140,
+    "wires": [
+      [
+        "08c5fb8e40f86aa7"
+      ]
+    ]
+  },
+  {
+    "id": "08c5fb8e40f86aa7",
+    "type": "bet-type",
+    "z": "64e7d6d8f5a3623e",
+    "kind": "Pass",
+    "number": "",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "15",
+    "unitType": "units",
+    "note": "",
+    "x": 320,
+    "y": 140,
+    "wires": [
+      [
+        "666b9b74bb3f137e"
+      ]
+    ]
+  },
+  {
+    "id": "666b9b74bb3f137e",
+    "type": "bet-type",
+    "z": "64e7d6d8f5a3623e",
+    "kind": "Place",
+    "number": "6",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "18",
+    "unitType": "units",
+    "note": "",
+    "x": 540,
+    "y": 120,
+    "wires": [
+      [
+        "2246b010c6e34538"
+      ]
+    ]
+  },
+  {
+    "id": "2246b010c6e34538",
+    "type": "bet-type",
+    "z": "64e7d6d8f5a3623e",
+    "kind": "Place",
+    "number": "8",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "18",
+    "unitType": "units",
+    "note": "",
+    "x": 540,
+    "y": 180,
+    "wires": [
+      [
+        "4cd03c9b4f1bb18f"
+      ]
+    ]
+  },
+  {
+    "id": "4cd03c9b4f1bb18f",
+    "type": "bet-prop",
+    "z": "64e7d6d8f5a3623e",
+    "propKind": "Hardway",
+    "number": "6",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "5",
+    "unitType": "units",
+    "note": "",
+    "x": 750,
+    "y": 160,
+    "wires": [
+      [
+        "1df61630f9fbf24a"
+      ]
+    ]
+  },
+  {
+    "id": "1df61630f9fbf24a",
+    "type": "strategy-compiler",
+    "z": "64e7d6d8f5a3623e",
+    "strategyName": "API_File_Journal",
+    "notes": "",
+    "x": 1010,
+    "y": 160,
+    "wires": [
+      [
+        "2d8592f2da4ec82c"
+      ]
+    ]
+  },
+  {
+    "id": "2d8592f2da4ec82c",
+    "type": "craps-api-runner",
+    "z": "64e7d6d8f5a3623e",
+    "apiConfig": "fc2b0b5f65fb0ff0",
+    "rolls": "12",
+    "strict_mode": false,
+    "prepare_file_output": true,
+    "label": "API runner (file output)",
+    "x": 1240,
+    "y": 160,
+    "wires": [
+      [
+        "7c304c796237f598",
+        "2f2dbbd7f2a43df3"
+      ]
+    ]
+  },
+  {
+    "id": "7c304c796237f598",
+    "type": "change",
+    "z": "64e7d6d8f5a3623e",
+    "name": "file_output → payload",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "file_output",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1470,
+    "y": 140,
+    "wires": [
+      [
+        "6b6b29a20f20702b"
+      ]
+    ]
+  },
+  {
+    "id": "6b6b29a20f20702b",
+    "type": "file",
+    "z": "64e7d6d8f5a3623e",
+    "name": "write NDJSON journal",
+    "filename": "/tmp/api_runner_journal.ndjson",
+    "appendNewline": false,
+    "createDir": false,
+    "overwriteFile": "true",
+    "encoding": "none",
+    "x": 1690,
+    "y": 140,
+    "wires": []
+  },
+  {
+    "id": "2f2dbbd7f2a43df3",
+    "type": "debug",
+    "z": "64e7d6d8f5a3623e",
+    "name": "sim_result",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "sim_result",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1490,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "fc2b0b5f65fb0ff0",
+    "type": "craps-api-config",
+    "base_url": "http://127.0.0.1:8000",
+    "profile_id": "default",
+    "default_seed_mode": "random",
+    "seed": "",
+    "timeout_ms": 5000,
+    "retries": 0,
+    "retry_backoff_ms": 0,
+    "auth_token": ""
+  }
+]
