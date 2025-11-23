@@ -2,6 +2,7 @@ const { getVarTable } = require("./legalizer.js");
 const { getBetDefinition, allowedNumbers } = require("../lib/bet_surface");
 const { normalizeStrategyName } = require("../lib/strategy_compiler");
 const { mapBetToVanillaSpec } = require("../lib/bet_mapping");
+const { mapActionToVanillaSpec } = require("../lib/action_mapping");
 
 function clone(x) { return JSON.parse(JSON.stringify(x)); }
 
@@ -188,28 +189,39 @@ function buildCompFromStrategyConfig(strategyConfig, vt, warn) {
     const comp = createEmptyComp();
     const errors = [];
 
-    if (!strategyConfig || !Array.isArray(strategyConfig.bets)) {
+    const hasActions = Array.isArray(strategyConfig?.actions) && strategyConfig.actions.length > 0;
+
+    if (!hasActions && (!strategyConfig || !Array.isArray(strategyConfig.bets))) {
         errors.push("export: strategy_config.bets must be an array");
         return { comp, errors };
     }
 
-    for (const bet of strategyConfig.bets) {
-        const def = getBetDefinition(bet.key);
-        if (!def) {
-            errors.push(`export: unknown bet key '${bet.key}'`);
-            continue;
+    if (hasActions) {
+        for (const action of strategyConfig.actions) {
+            const spec = mapActionToVanillaSpec(action, { varTable: vt, logger: { warn } });
+            if (!spec) continue;
+            if (spec.comment) { warn && warn(spec.comment); continue; }
+            addToBucket(comp, action.meta?.phase, spec);
         }
+    } else {
+        for (const bet of strategyConfig.bets) {
+            const def = getBetDefinition(bet.key);
+            if (!def) {
+                errors.push(`export: unknown bet key '${bet.key}'`);
+                continue;
+            }
 
-        try {
-            const spec = mapBetToVanillaSpec({
-                key: bet.key,
-                base_amount: bet.base_amount,
-                unit_type: bet.unit_type,
-                number: bet.number
-            }, def, { varTable: vt });
-            addToBucket(comp, bet.phase, spec);
-        } catch (err) {
-            errors.push(`export: bet '${bet.key}' invalid - ${err.message}`);
+            try {
+                const spec = mapBetToVanillaSpec({
+                    key: bet.key,
+                    base_amount: bet.base_amount,
+                    unit_type: bet.unit_type,
+                    number: bet.number
+                }, def, { varTable: vt });
+                addToBucket(comp, bet.phase, spec);
+            } catch (err) {
+                errors.push(`export: bet '${bet.key}' invalid - ${err.message}`);
+            }
         }
     }
 

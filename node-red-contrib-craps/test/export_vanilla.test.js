@@ -55,3 +55,18 @@ assert(Array.isArray(configErrors) && configErrors.length === 0, `buildCompFromS
 
 assert.deepStrictEqual(compiledComp, legacyComp, "strategy_config and legacy recipe paths should agree");
 console.log("export-vanilla legacy compatibility path passed");
+
+const actionStrategy = {
+    strategy_name: "ActionExample",
+    table: vt,
+    actions: [
+        { verb: "pass_line", args: { amount: 10 }, meta: { unit_type: "units" } },
+        { verb: "place", args: { amount: 30, number: 6 }, meta: { unit_type: "dollars" } }
+    ]
+};
+
+const { comp: actionComp, errors: actionErrors } = helpers.buildCompFromStrategyConfig(actionStrategy, vt, () => {});
+assert(Array.isArray(actionErrors) && actionErrors.length === 0, `Unexpected action errors: ${actionErrors}`);
+assert(actionComp.maingame.line.some(b => b.key === "pass_line"), "Action path should include pass_line");
+assert.strictEqual(actionComp.maingame.place[6], 30, "Action path should legalize place 6");
+console.log("export-vanilla actions path passed");

@@ -1,6 +1,17 @@
 const { getBetDefinition, isSupported, allowedNumbers } = require("./bet_surface");
 const { getVarTable } = require("../vanilla/legalizer");
+const { getVerbEntry, validateAction } = require("./verb_registry");
 const pkg = require("../package.json");
+
+function deriveOddsBase(key) {
+    switch (key) {
+        case "odds_pass_line": return "pass_line";
+        case "odds_dont_pass": return "dont_pass";
+        case "odds_come": return "come";
+        case "odds_dont_come": return "dont_come";
+        default: return null;
+    }
+}
 
 function requiresNumber(def) {
     return !!def && !!def.requires_number;
@@ -41,6 +52,7 @@ function compileStrategyConfig({
     const vt = table || (fallbackGetVarTable ? fallbackGetVarTable(flow, msg) : undefined);
 
     const bets = [];
+    const actions = [];
     for (const step of steps || []) {
         if (!step || typeof step !== "object") continue;
         const type = step.type;
@@ -76,7 +88,7 @@ function compileStrategyConfig({
             warn(msgWarn);
         }
 
-        bets.push({
+        const betEntry = {
             key: def.key,
             base_amount: baseAmount,
             unit_type: unitType,
@@ -84,7 +96,35 @@ function compileStrategyConfig({
             bet_id: step.betId ?? step.bet_id ?? null,
             note: step.note ?? null,
             working: step.working ?? null
-        });
+        };
+        bets.push(betEntry);
+
+        const actionArgs = { amount: baseAmount };
+        if (requiresNumber(def)) actionArgs.number = number !== undefined ? Number(number) : def.number;
+        if (def.family === "odds") {
+            actionArgs.base = deriveOddsBase(def.key);
+            if (!actionArgs.base) {
+                errs.push(`Bet '${type}' cannot derive odds base`);
+                continue;
+            }
+            if (step.working !== undefined) actionArgs.working = Boolean(step.working);
+        }
+        const action = {
+            verb: def.engine_verb,
+            args: actionArgs,
+            meta: {
+                note: betEntry.note,
+                bet_id: betEntry.bet_id,
+                unit_type: unitType
+            }
+        };
+        try {
+            getVerbEntry(action.verb);
+            validateAction(action.verb, action.args);
+            actions.push(action);
+        } catch (err) {
+            errs.push(`Invalid action for bet '${type}': ${err.message}`);
+        }
     }
 
     if (!bets.length) {
@@ -100,6 +140,7 @@ function compileStrategyConfig({
         strategy_name: normalizeStrategyName(strategyName),
         table: vt,
         bets,
+        actions,
         metadata: buildMetadata(metadata)
     };
 

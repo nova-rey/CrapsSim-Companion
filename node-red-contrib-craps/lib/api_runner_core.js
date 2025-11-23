@@ -1,6 +1,7 @@
 const axios = require("axios");
 const { getBetDefinition } = require("./bet_surface");
 const { mapBetToApiAction, UnknownBetError } = require("./bet_mapping");
+const { mapActionToApiCall } = require("./action_mapping");
 
 function mapBetToAction(bet, vt, logger) {
     const def = getBetDefinition(bet.key);
@@ -115,8 +116,12 @@ async function runStrategyViaApi({
 
     const journal = [];
 
-    for (const bet of strategyConfig.bets || []) {
-        const action = mapBetToAction(bet, varTable, logger);
+    const setupActions = (Array.isArray(strategyConfig.actions) && strategyConfig.actions.length)
+        ? strategyConfig.actions
+        : strategyConfig.bets;
+
+    for (const step of setupActions || []) {
+        const action = strategyConfig.actions ? mapActionToApiCall(step, { varTable, logger }) : mapBetToAction(step, varTable, logger);
         if (!action) continue;
         let resp;
         try {

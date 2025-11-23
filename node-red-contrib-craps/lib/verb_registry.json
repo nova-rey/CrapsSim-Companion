@@ -1,0 +1,552 @@
+[
+  {
+    "verb": "pass_line",
+    "family": "line",
+    "engine_verb": "pass_line",
+    "label": "Pass Line",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": {
+        "amount": "number"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetPassLine",
+      "arg_order": ["amount"]
+    }
+  },
+  {
+    "verb": "dont_pass",
+    "family": "line",
+    "engine_verb": "dont_pass",
+    "label": "Don't Pass",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": {
+        "amount": "number"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetDontPass",
+      "arg_order": ["amount"]
+    }
+  },
+  {
+    "verb": "come",
+    "family": "line",
+    "engine_verb": "come",
+    "label": "Come",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": {
+        "amount": "number"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetCome",
+      "arg_order": ["amount"]
+    }
+  },
+  {
+    "verb": "dont_come",
+    "family": "line",
+    "engine_verb": "dont_come",
+    "label": "Don't Come",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": {
+        "amount": "number"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetDontCome",
+      "arg_order": ["amount"]
+    }
+  },
+  {
+    "verb": "put",
+    "family": "line",
+    "engine_verb": "put",
+    "label": "Put Bet",
+    "args_schema": {
+      "required": ["amount", "number"],
+      "optional": [],
+      "types": {
+        "amount": "number",
+        "number": "integer"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 },
+        "number": { "allowed": [4, 5, 6, 8, 9, 10] }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetCome",
+      "arg_order": ["amount"]
+    }
+  },
+  {
+    "verb": "odds",
+    "family": "odds",
+    "engine_verb": "odds",
+    "label": "Odds",
+    "args_schema": {
+      "required": ["base", "amount"],
+      "optional": ["number", "working"],
+      "types": {
+        "amount": "number",
+        "base": "string",
+        "number": "integer",
+        "working": "boolean"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 },
+        "base": { "allowed": ["pass_line", "dont_pass", "come", "dont_come"] },
+        "number": { "allowed": [4, 5, 6, 8, 9, 10] }
+      }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "place",
+    "family": "place",
+    "engine_verb": "place",
+    "label": "Place Bet",
+    "args_schema": {
+      "required": ["amount", "number"],
+      "optional": [],
+      "types": {
+        "amount": "number",
+        "number": "integer"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 },
+        "number": { "allowed": [4, 5, 6, 8, 9, 10] }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetPlace",
+      "arg_order": ["number", "amount"]
+    },
+    "notes": "Standard Place bet on a box number."
+  },
+  {
+    "verb": "buy",
+    "family": "place",
+    "engine_verb": "buy",
+    "label": "Buy Bet",
+    "args_schema": {
+      "required": ["amount", "number"],
+      "optional": [],
+      "types": {
+        "amount": "number",
+        "number": "integer"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 },
+        "number": { "allowed": [4, 5, 6, 8, 9, 10] }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetPlace",
+      "arg_order": ["number", "amount"]
+    }
+  },
+  {
+    "verb": "lay",
+    "family": "lay",
+    "engine_verb": "lay",
+    "label": "Lay Bet",
+    "args_schema": {
+      "required": ["amount", "number"],
+      "optional": [],
+      "types": {
+        "amount": "number",
+        "number": "integer"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 },
+        "number": { "allowed": [4, 5, 6, 8, 9, 10] }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetLay",
+      "arg_order": ["number", "amount"]
+    }
+  },
+  {
+    "verb": "big6",
+    "family": "place",
+    "engine_verb": "big6",
+    "label": "Big 6",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": {
+        "amount": "number"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetPlace",
+      "arg_order": ["number", "amount"]
+    }
+  },
+  {
+    "verb": "big8",
+    "family": "place",
+    "engine_verb": "big8",
+    "label": "Big 8",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": {
+        "amount": "number"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetPlace",
+      "arg_order": ["number", "amount"]
+    }
+  },
+  {
+    "verb": "field",
+    "family": "prop",
+    "engine_verb": "field",
+    "label": "Field",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": {
+        "amount": "number"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetField",
+      "arg_order": ["amount"]
+    }
+  },
+  {
+    "verb": "any7",
+    "family": "prop",
+    "engine_verb": "any7",
+    "label": "Any 7",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": {
+        "amount": "number"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 }
+      }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "any_craps",
+    "family": "prop",
+    "engine_verb": "any_craps",
+    "label": "Any Craps",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": {
+        "amount": "number"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 }
+      }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "two",
+    "family": "prop",
+    "engine_verb": "two",
+    "label": "2 (Snake Eyes)",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": {
+        "amount": "number"
+      },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "three",
+    "family": "prop",
+    "engine_verb": "three",
+    "label": "3 (Ace-Deuce)",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": { "amount": "number" },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "yo",
+    "family": "prop",
+    "engine_verb": "yo",
+    "label": "Yo (Eleven)",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": { "amount": "number" },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "boxcars",
+    "family": "prop",
+    "engine_verb": "boxcars",
+    "label": "12 (Boxcars)",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": { "amount": "number" },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "horn",
+    "family": "prop",
+    "engine_verb": "horn",
+    "label": "Horn",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": { "amount": "number" },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "world",
+    "family": "prop",
+    "engine_verb": "world",
+    "label": "World / Whirl",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": { "amount": "number" },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "c&e",
+    "family": "prop",
+    "engine_verb": "c&e",
+    "label": "C & E",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": { "amount": "number" },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "hardway",
+    "family": "hardway",
+    "engine_verb": "hardway",
+    "label": "Hardway",
+    "args_schema": {
+      "required": ["amount", "number"],
+      "optional": [],
+      "types": {
+        "amount": "number",
+        "number": "integer"
+      },
+      "constraints": {
+        "amount": { "min": 0.01 },
+        "number": { "allowed": [4, 6, 8, 10] }
+      }
+    },
+    "vanilla_mapping": {
+      "class": "BetHardway",
+      "arg_order": ["number", "amount"]
+    }
+  },
+  {
+    "verb": "hop",
+    "family": "prop",
+    "engine_verb": "hop",
+    "label": "Hop",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": ["dice"],
+      "types": {
+        "amount": "number",
+        "dice": "string"
+      },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "fire",
+    "family": "feature",
+    "engine_verb": "fire",
+    "label": "Fire Bet",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": { "amount": "number" },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "all",
+    "family": "feature",
+    "engine_verb": "all",
+    "label": "All",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": { "amount": "number" },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "tall",
+    "family": "feature",
+    "engine_verb": "tall",
+    "label": "Tall",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": { "amount": "number" },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "small",
+    "family": "feature",
+    "engine_verb": "small",
+    "label": "Small",
+    "args_schema": {
+      "required": ["amount"],
+      "optional": [],
+      "types": { "amount": "number" },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "remove_bet",
+    "family": "management",
+    "engine_verb": "remove_bet",
+    "label": "Remove Bet",
+    "args_schema": {
+      "required": ["bet_id"],
+      "optional": [],
+      "types": {
+        "bet_id": "string"
+      }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "reduce_bet",
+    "family": "management",
+    "engine_verb": "reduce_bet",
+    "label": "Reduce Bet",
+    "args_schema": {
+      "required": ["bet_id", "amount"],
+      "optional": [],
+      "types": {
+        "bet_id": "string",
+        "amount": "number"
+      },
+      "constraints": { "amount": { "min": 0.01 } }
+    },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "clear_all_bets",
+    "family": "management",
+    "engine_verb": "clear_all_bets",
+    "label": "Clear All Bets",
+    "args_schema": { "required": [], "optional": [], "types": {} },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "clear_center_bets",
+    "family": "management",
+    "engine_verb": "clear_center_bets",
+    "label": "Clear Center Bets",
+    "args_schema": { "required": [], "optional": [], "types": {} },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "clear_place_buy_lay",
+    "family": "management",
+    "engine_verb": "clear_place_buy_lay",
+    "label": "Clear Place/Buy/Lay",
+    "args_schema": { "required": [], "optional": [], "types": {} },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "clear_ats_bets",
+    "family": "management",
+    "engine_verb": "clear_ats_bets",
+    "label": "Clear ATS Bets",
+    "args_schema": { "required": [], "optional": [], "types": {} },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "clear_fire_bets",
+    "family": "management",
+    "engine_verb": "clear_fire_bets",
+    "label": "Clear Fire Bets",
+    "args_schema": { "required": [], "optional": [], "types": {} },
+    "vanilla_mapping": null
+  },
+  {
+    "verb": "set_odds_working",
+    "family": "management",
+    "engine_verb": "set_odds_working",
+    "label": "Set Odds Working",
+    "args_schema": {
+      "required": ["working"],
+      "optional": [],
+      "types": { "working": "boolean" }
+    },
+    "vanilla_mapping": null
+  }
+]
