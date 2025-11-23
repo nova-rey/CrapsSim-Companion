@@ -28,6 +28,7 @@
     <li>Calls <code>/session/start</code>, <code>/session/apply_action</code>, <code>/session/roll</code>, and <code>/end_session</code>.</li>
     <li>Outputs <code>msg.sim_result</code>, <code>msg.sim_journal</code>, and sets <code>msg.payload</code>.</li>
     <li>If <b>Prepare File Output</b> is enabled, <code>msg.file_output</code> and <code>msg.filename</code> are populated for downstream file nodes.</li>
+    <li><b>Parity/scripted rolls:</b> set <code>msg.roll_mode = "script"</code> or <code>msg.parity_mode = true</code> and supply <code>msg.dice_script</code> as an array of [d1,d2] pairs. Invalid scripts or short scripts raise clear errors.</li>
   </ul>
 </script>
 

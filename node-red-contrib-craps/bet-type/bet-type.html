@@ -61,7 +61,12 @@
 </script>
 
 <script type="text/html" data-help-name="bet-type">
-  <p>Line/Place/Lay/Field. Choose <b>fixed</b> to enter amount + units here, or <b>feed</b> to read from <code>bet-in</code> / <code>msg.vars[betId]</code> / <code>msg.var</code>.</p>
+  <p>Line/Place/Lay/Field/Odds builder. Choose <b>fixed</b> to enter amount + units here, or <b>feed</b> to read from <code>bet-in</code> / <code>msg.vars[betId]</code> / <code>msg.var</code>.</p>
+  <ul>
+    <li><b>Odds:</b> Pass Odds / Don't Pass Odds require only an amount; Come Odds / Don't Come Odds require the point number (4/5/6/8/9/10). Use the <b>Working on come-out</b> checkbox when applicable.</li>
+    <li>Odds map to the Engine API only; the vanilla exporter will reject them explicitly.</li>
+    <li>Place/Lay numbers are only shown when required for the selected bet kind.</li>
+  </ul>
 </script>
 
   <script type="text/javascript">

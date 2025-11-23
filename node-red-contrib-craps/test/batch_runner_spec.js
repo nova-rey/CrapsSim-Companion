@@ -47,6 +47,9 @@ async function testSeedListBatch() {
     assert.strictEqual(out.batch_summary.runs, 3);
     assert.strictEqual(out.batch_summary.min_net, 111); // 10 + seed
     assert.strictEqual(out.batch_summary.max_net, 113);
+    assert.strictEqual(out.batch_summary.winning_run_fraction, 1);
+    assert(out.batch_summary.mean_net > 0);
+    assert.strictEqual(out.payload, out.batch_summary);
     console.log("batch-runner seed list test passed");
 }
 

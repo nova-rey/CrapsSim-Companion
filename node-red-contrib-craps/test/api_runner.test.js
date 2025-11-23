@@ -149,6 +149,32 @@ async function testParityModeHappy() {
     console.log("api-runner parity mode happy path passed");
 }
 
+async function testParityModeFlagOnly() {
+    const node = createNodeStub();
+    const apiConfig = { base_url: "http://127.0.0.1:8000", default_seed_mode: "fixed", seed: 9 };
+    const msg = defaultMsg();
+    msg.dice_script = [[5, 2]];
+    msg.parity_mode = true;
+
+    nock(apiConfig.base_url).post("/session/start").reply(200, { session_id: "abc", bankroll: 150 });
+    nock(apiConfig.base_url).post("/session/apply_action").twice().reply(200, {});
+    const seenDice = [];
+    nock(apiConfig.base_url).post("/session/roll", body => { seenDice.push(body.dice); return true; }).reply(200, { bankroll: 155 });
+    nock(apiConfig.base_url).post("/end_session").reply(200, {});
+
+    const out = await runSimulation({
+        msg,
+        nodeConfig: { rolls: 1, strict_mode: false, prepare_file_output: false },
+        apiConfigNode: apiConfig,
+        node,
+        httpClient: require("axios")
+    });
+
+    assert.deepStrictEqual(seenDice, msg.dice_script);
+    assert.strictEqual(out.sim_result.seed, 9);
+    console.log("api-runner parity flag-only path passed");
+}
+
 async function testParityExhaustion() {
     const node = createNodeStub();
     const apiConfig = { base_url: "http://127.0.0.1:8000", default_seed_mode: "fixed", seed: 7 };
@@ -238,6 +264,8 @@ async function testHttpFailure() {
         await testHttpFailure();
         nock.cleanAll();
         await testParityModeHappy();
+        nock.cleanAll();
+        await testParityModeFlagOnly();
         nock.cleanAll();
         await testParityExhaustion();
         nock.cleanAll();

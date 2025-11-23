@@ -29,8 +29,10 @@
   <p>Runs a compiled strategy_config across multiple seeds via the CrapsSim Engine HTTP API.</p>
   <ul>
     <li>Requires <code>msg.strategy_config</code> from the Strategy Compiler.</li>
-    <li>Message overrides: <code>msg.seeds</code> (array), or <code>msg.seed_start</code> + <code>msg.seed_count</code>, and <code>msg.rolls</code>.</li>
+    <li>Seed config: <code>msg.seeds</code> (array), or <code>msg.seed_start</code> + <code>msg.seed_count</code> (contiguous range). <code>msg.rolls</code> overrides the node default.</li>
+    <li>Parity/scripted rolls: honor <code>msg.roll_mode = "script"</code> or <code>msg.parity_mode = true</code> plus <code>msg.dice_script</code> to reuse a dice script across runs.</li>
     <li>Outputs <code>msg.batch_result</code> (per-run summaries) and <code>msg.batch_summary</code> (aggregates). <code>msg.payload</code> is the summary.</li>
+    <li>Stops on the first fatal run error and reports <code>msg.batch_error</code> with the failing seed/stage.</li>
   </ul>
 </script>
 
