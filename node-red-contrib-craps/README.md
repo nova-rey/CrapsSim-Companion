@@ -24,6 +24,25 @@ This node pack exposes a supported-only bet surface aligned with the CrapsSim En
 - **Parity mode:** Deterministic dice via `roll_mode: "script"` or `parity_mode: true` with `dice_script` entries per roll. Still sends seeds but rolls come from the script.
 - **Batch runner:** Execute the same `strategy_config` across multiple seeds (explicit list or generated range) and return aggregated stats (`batch_summary`) plus per-run rows (`batch_result`).
 
+## Action Grammar (Phase 7)
+
+- The Node-RED pack now compiles flows into a `strategy_config` object with an `actions[]` array describing each `{ verb, args, meta }` tuple.
+- Verbs are defined centrally in the Verb Registry (`lib/verb_registry.json`), which also governs argument schemas and vanilla-export mappings.
+- Execution paths (Engine API Runner and vanilla exporter) prefer `actions[]` when present and fall back to legacy `bets[]` for older flows.
+
+Most users never hand-edit `strategy_config`—the Strategy Compiler produces it automatically. Advanced users and integrations can inspect `actions[]` directly when needed.
+
+```json
+{
+  "strategy_name": "three_point_molly",
+  "actions": [
+    { "verb": "pass_line", "args": { "amount": 10 } },
+    { "verb": "come", "args": { "amount": 10 } },
+    { "verb": "place", "args": { "number": 6, "amount": 30 } }
+  ]
+}
+```
+
 ## Bet Surface Overview (Phase 1)
 
 - `bet_surface.json` at the repo root is the single source of truth for every bet identifier used by the pack. Each entry includes a canonical key, the engine code it maps to, and is currently supported for export.
@@ -63,12 +82,16 @@ Phase 1 targets the current CrapsSim vanilla/API bet surface that exposes `BetPa
 
 `strategy_config` is the normalized object the node pack builds from your graph. Bet nodes emit canonical bet steps (with amounts and unit types), table nodes provide limits/multipliers, and the **Strategy Compiler** assembles everything into a single object that exporters and runners can consume.
 
-You usually do not edit `strategy_config` by hand; it is produced automatically. A typical object looks like:
+You usually do not edit `strategy_config` by hand; it is produced automatically. In Phase 7 the canonical surface is `actions[]` (with legacy `bets[]` retained for compatibility):
 
 ```json
 {
   "strategy_name": "MyStrategy",
   "table": { "mode": "10", "multiplier": 10, "bubble": false },
+  "actions": [
+    { "verb": "pass_line", "args": { "amount": 10 }, "meta": { "unit_type": "units" } },
+    { "verb": "place", "args": { "amount": 12, "number": 6 }, "meta": { "unit_type": "dollars" } }
+  ],
   "bets": [
     { "key": "pass_line", "base_amount": 10, "unit_type": "units" },
     { "key": "place_6", "base_amount": 12, "unit_type": "dollars", "number": 6 }
@@ -77,7 +100,7 @@ You usually do not edit `strategy_config` by hand; it is produced automatically.
 }
 ```
 
-Exporters and runners read `strategy_config` to build CrapsSim components. Amounts expressed in `units` are scaled using the table multiplier; amounts in `dollars` are passed through directly.
+Exporters and runners read `strategy_config` to build CrapsSim components. Amounts expressed in `units` are scaled using the table multiplier; amounts in `dollars` are passed through directly. When both arrays are present, the nodes prefer `actions[]` and ignore `bets[]` unless the actions list is empty.
 
 ## Strategy Compiler node
 
@@ -90,6 +113,8 @@ Exporters and runners read `strategy_config` to build CrapsSim components. Amoun
 The Engine API Runner executes a compiled `strategy_config` against a running CrapsSim Engine HTTP API (e.g., `uvicorn crapssim_api.http:app`). It complements the vanilla exporter path—you can still export local Python files, or you can hit the HTTP API for immediate simulation feedback.
 
 Typical flow: `bet` nodes → **Strategy Compiler** → **API Runner** → Debug/File.
+
+When `strategy_config.actions[]` is present, the runner sends those actions directly to `/session/apply_action`; it falls back to mapping `bets[]` only when no actions are provided.
 
 ### craps-api-config (config node)
 
@@ -108,7 +133,7 @@ Override behavior: `msg.api_config` can override most fields, and `msg.profile_i
 ### api-runner node
 
 - **Inputs:** Requires `msg.strategy_config` from the Strategy Compiler. Optional overrides: `msg.seed`, `msg.rolls`/`msg.runs`, `msg.profile_id`, `msg.api_config`.
-- **Calls:** `/session/start` → `/session/apply_action` (for each bet) → `/session/roll` (for configured roll count) → `/end_session`.
+- **Calls:** `/session/start` → `/session/apply_action` (for each action; prefers `actions[]`, falls back to `bets[]`) → `/session/roll` (for configured roll count) → `/end_session`.
 - **Outputs:**
   - `msg.sim_result`: Summary with `strategy_name`, `seed`, `profile_id`, `rolls`, bankroll start/end, `net`, `ev_per_roll`, and aggregated `errors`.
   - `msg.sim_journal`: Roll-by-roll responses from the Engine API.
@@ -207,7 +232,7 @@ export-vanilla
 
 Converts the recipe into a runnable Python module using CrapsSim’s strategy API (AggregateStrategy, BetDontPass, BetPlace, BetField, etc.).
 
-ℹ️ The exporter now prefers <code>msg.strategy_config</code> (assembled by the <b>strategy-compiler</b> node) as its primary input, but will fall back to <code>msg.recipe.steps</code> for legacy flows. Wiring is unchanged: feed your bet nodes into the compiler, then into the exporter.
+ℹ️ The exporter now prefers <code>msg.strategy_config</code> (assembled by the <b>strategy-compiler</b> node) as its primary input, but will fall back to <code>msg.recipe.steps</code> for legacy flows. When <code>strategy_config.actions[]</code> is present, it is used as the canonical source; <code>bets[]</code> is only consulted when actions are absent. Wiring is unchanged: feed your bet nodes into the compiler, then into the exporter.
 
 Exports to a .py file via the File node.
 

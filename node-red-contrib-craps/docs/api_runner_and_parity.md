@@ -3,8 +3,8 @@
 The **Run: Engine API Simulation** node executes a compiled `strategy_config` against the CrapsSim Engine HTTP API. Phase 5 adds parity mode for deterministic dice scripts alongside the normal random-roll behavior.
 
 ## Normal mode recap
-1. Input: `msg.strategy_config` (from Strategy Compiler). Optional overrides: `msg.rolls`/`msg.runs`, `msg.seed`, `msg.profile_id`, `msg.api_config`.
-2. Calls: `/session/start` (with seed + profile) → `/session/apply_action` (one per bet) → `/session/roll` (for the configured roll count) → `/end_session`.
+1. Input: `msg.strategy_config` (from Strategy Compiler). Optional overrides: `msg.rolls`/`msg.runs`, `msg.seed`, `msg.profile_id`, `msg.api_config`. When `strategy_config.actions[]` exists, the runner uses it directly and skips `bets[]`.
+2. Calls: `/session/start` (with seed + profile) → `/session/apply_action` (one per action) → `/session/roll` (for the configured roll count) → `/end_session`.
 3. Output fields:
    - `msg.sim_result`: `{ strategy_name, seed, profile_id, rolls, bankroll_start, bankroll_end, net, ev_per_roll, errors, end_summary }`
    - `msg.sim_journal`: roll-by-roll responses.
@@ -26,7 +26,11 @@ The **Run: Engine API Simulation** node executes a compiled `strategy_config` ag
 ### Example
 ```json
 {
-  "strategy_config": { "strategy_name": "ParityDemo", "bets": [ { "key": "pass_line", "base_amount": 10, "unit_type": "units" } ] },
+  "strategy_config": {
+    "strategy_name": "ParityDemo",
+    "actions": [ { "verb": "pass_line", "args": { "amount": 10 }, "meta": { "unit_type": "units" } } ],
+    "bets": [ { "key": "pass_line", "base_amount": 10, "unit_type": "units" } ]
+  },
   "roll_mode": "script",
   "dice_script": [ [3,4], [2,2], [6,1] ],
   "rolls": 3

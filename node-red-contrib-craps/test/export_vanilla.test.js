@@ -7,6 +7,12 @@ const helpers = exporter._test;
 assert(helpers, "Exporter helpers should be exposed for testing");
 
 const vt = getVarTable({ get: () => undefined }, {});
+const vtBubble = {
+    mode: "bubble",
+    multiplier: 1,
+    bubble: true,
+    rules: { flatIncrement: 1, placeIncrements: {}, layIncrement: 1, propIncrement: 1, oddsPolicy: { enabled: false, maxMultiple: {} } }
+};
 
 const strategy_config = {
     strategy_name: "ExampleStrategy",
@@ -70,3 +76,20 @@ assert(Array.isArray(actionErrors) && actionErrors.length === 0, `Unexpected act
 assert(actionComp.maingame.line.some(b => b.key === "pass_line"), "Action path should include pass_line");
 assert.strictEqual(actionComp.maingame.place[6], 30, "Action path should legalize place 6");
 console.log("export-vanilla actions path passed");
+
+const dualSurface = {
+    strategy_name: "DualSurface",
+    table: vtBubble,
+    actions: [
+        { verb: "pass_line", args: { amount: 5 }, meta: { unit_type: "dollars" } }
+    ],
+    bets: [
+        { key: "pass_line", base_amount: 25, unit_type: "dollars" }
+    ]
+};
+
+const { comp: dualComp, errors: dualErrors } = helpers.buildCompFromStrategyConfig(dualSurface, vtBubble, () => {});
+assert(Array.isArray(dualErrors) && dualErrors.length === 0, `Unexpected dual-surface errors: ${dualErrors}`);
+const dualLine = dualComp.maingame.line.find(b => b.key === "pass_line");
+assert(dualLine && dualLine.amount === 5, "Actions should drive exporter when both arrays are present");
+console.log("export-vanilla actions preferred over bets passed");
