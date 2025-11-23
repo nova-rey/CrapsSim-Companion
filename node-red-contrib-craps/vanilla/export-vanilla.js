@@ -5,12 +5,49 @@ module.exports = function(RED) {
         dollarsFromUnitsOrLiteral,
         legalizeBetByType
     } = require("./legalizer.js");
+    const { getBetDefinition, isSupported, allowedNumbers } = require("../lib/bet_surface");
 
     function ExportVanillaNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
 
         function clone(x) { return JSON.parse(JSON.stringify(x)); }
+
+        function canonicalizeBet(kind, number) {
+            const num = number != null ? Number(number) : undefined;
+            const def = getBetDefinition(kind);
+            if (def) return { def, number: num ?? def.number };
+
+            const k = (kind || "").toString().toLowerCase();
+            const allowed = allowedNumbers.has(num);
+            switch (k) {
+                case "pass": return { def: getBetDefinition("pass_line"), number: num };
+                case "dontpass":
+                case "don'tpass":
+                case "dont_pass": return { def: getBetDefinition("dont_pass"), number: num };
+                case "come": return { def: getBetDefinition("come"), number: num };
+                case "dontcome":
+                case "don'tcome":
+                case "dont_come": return { def: getBetDefinition("dont_come"), number: num };
+                case "field": return { def: getBetDefinition("field"), number: num };
+                case "place": return allowed ? { def: getBetDefinition(`place_${num}`), number: num } : { def: null, number: num };
+                case "lay": return allowed ? { def: getBetDefinition(`lay_${num}`), number: num } : { def: null, number: num };
+                case "hardway": return [4, 6, 8, 10].includes(Number(num)) ? { def: getBetDefinition(`hardway_${num}`), number: num } : { def: null, number: num };
+                case "prop": return { def: getBetDefinition("prop_other"), number: num };
+                case "odds": return { def: getBetDefinition("odds_pass_line"), number: num };
+                default: return { def: null, number: num };
+            }
+        }
+
+        function lineCtor(key) {
+            switch (key) {
+                case "pass_line": return "BetPassLine";
+                case "dont_pass": return "BetDontPass";
+                case "come": return "BetCome";
+                case "dont_come": return "BetDontCome";
+                default: return null;
+            }
+        }
 
         // Expand loop blocks in msg.recipe.steps
         function unroll(steps) {
@@ -38,26 +75,6 @@ module.exports = function(RED) {
             if (phase === "comeout") return "BET_IF_POINT_OFF";
             if (phase === "maingame") return "BET_IF_POINT_ON";
             return null; // endgame: usually cleanup/no-op
-        }
-
-        // Map designer kind → legalizer bet.type
-        function mapKindToLegalizer(kind) {
-            switch ((kind || "").toLowerCase()) {
-                case "pass": return "pass";
-                case "dontpass":
-                case "don'tpass":
-                case "dont_pass": return "dont_pass";
-                case "come": return "come";
-                case "dontcome":
-                case "don'tcome":
-                case "dont_come": return "dont_come";
-                case "field": return "field";
-                case "place": return "place";
-                case "lay": return "lay";
-                case "hardway":
-                case "hard": return "hardway";
-                default: return "";
-            }
         }
 
         node.on("input", function(msg, send, done) {
@@ -93,7 +110,16 @@ module.exports = function(RED) {
                     }
 
                     const kind = s.type;
-                    const num  = (s.number !== undefined) ? Number(s.number) : undefined;
+                    const numInput  = (s.number !== undefined) ? Number(s.number) : undefined;
+                    const { def, number: resolvedNumber } = canonicalizeBet(kind, numInput);
+                    if (!def) { node.warn(`export: skipping unknown bet type '${kind}'`); continue; }
+
+                    const family = def.family;
+                    const num = resolvedNumber;
+                    if (["place", "lay", "hardway"].includes(family) && !allowedNumbers.has(Number(num))) {
+                        node.warn(`export: skipping ${def.key} with invalid point ${String(num)}`);
+                        continue;
+                    }
 
                     // Normalize amount via legalizer: handle {units|dollars} and enforce increments
                     const value = s.amount;
@@ -105,39 +131,36 @@ module.exports = function(RED) {
                     }
                     if (!(preDollars > 0)) continue;
 
-                    const lgType = mapKindToLegalizer(kind);
-                    if (!lgType) continue;
+                    const legalized = legalizeBetByType({ type: def.key, point: num }, preDollars, undefined, vt);
 
-                    const legalized = legalizeBetByType({ type: lgType, point: num }, preDollars, undefined, vt);
+                    if (!isSupported(def.key)) {
+                        node.warn(`export: bet type '${def.key}' is currently unsupported and may be ignored by the engine.`);
+                    }
 
                     const bkt = currentBucket();
-                    switch (kind) {
-                        case "Pass":
-                        case "DontPass":
-                        case "Come":
-                        case "DontCome":
-                            bkt.line.push({ kind, amount: legalized });
+                    switch (family) {
+                        case "line":
+                            bkt.line.push({ key: def.key, amount: legalized });
                             break;
-                        case "Place":
+                        case "place":
                             if ([4,5,6,8,9,10].includes(num)) {
                                 bkt.place[num] = (bkt.place[num] || 0) + legalized;
                             }
                             break;
-                        case "Lay":
+                        case "lay":
                             if ([4,5,6,8,9,10].includes(num)) {
                                 bkt.lay[num] = (bkt.lay[num] || 0) + legalized;
                             }
                             break;
-                        case "Field":
+                        case "field":
                             bkt.field.push({ amount: legalized });
                             break;
-                        case "Hardway":
+                        case "hardway":
                             if ([4,6,8,10].includes(num)) {
                                 bkt.hard.push({ number: num, amount: legalized });
                             }
                             break;
                         default:
-                            // Unmapped props ignored (validator should warn upstream)
                             break;
                     }
                 }
@@ -154,10 +177,10 @@ module.exports = function(RED) {
 
                 for (const ph of ["comeout","maingame","endgame"]) {
                     const b = comp[ph];
-                    if (b.line.some(x => x.kind === "Pass")) needBetPass = true;
-                    if (b.line.some(x => x.kind === "DontPass")) needBetDP = true;
-                    if (b.line.some(x => x.kind === "Come")) needBetCome = true;
-                    if (b.line.some(x => x.kind === "DontCome")) needBetDC = true;
+                    if (b.line.some(x => x.key === "pass_line")) needBetPass = true;
+                    if (b.line.some(x => x.key === "dont_pass")) needBetDP = true;
+                    if (b.line.some(x => x.key === "come")) needBetCome = true;
+                    if (b.line.some(x => x.key === "dont_come")) needBetDC = true;
                     if (hasAny(b.place)) { needPlace = true; needMode = true; }
                     if (hasAny(b.lay))   { needLay   = true; needMode = true; }
                     if (b.field.length)  { needField = true; needMode = true; }
@@ -199,12 +222,8 @@ module.exports = function(RED) {
                     for (const it of arr) {
                         const args = [`bet_amount=${it.amount}`];
                         const modeArg = pyModeFor(ph);
-                        if (modeArg && (it.kind !== "Pass" && it.kind !== "DontPass")) args.push(modeArg);
-                        const ctor =
-                        it.kind === "Pass"     ? "BetPassLine" :
-                        it.kind === "DontPass" ? "BetDontPass" :
-                        it.kind === "Come"     ? "BetCome" :
-                        it.kind === "DontCome" ? "BetDontCome" : null;
+                        if (modeArg && (it.key !== "pass_line" && it.key !== "dont_pass")) args.push(modeArg);
+                        const ctor = lineCtor(it.key);
                         if (ctor) lines.push(`    comps.append(${ctor}(${args.join(", ")}))`);
                     }
                 }

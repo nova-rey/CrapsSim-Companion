@@ -1,3 +1,5 @@
+const { getBetDefinition } = require("../lib/bet_surface");
+
 const clampInt = n => Math.max(0, Math.round(Number(n) || 0));
 const roundUpTo = (n, inc) => inc > 0 ? Math.ceil(n / inc) * inc : clampInt(n);
 
@@ -49,25 +51,26 @@ function capOddsToPolicy(point, baseFlat, oddsDollars, vt) {
 }
 
 function legalizeBetByType(bet, dollars, context, vt) {
-    const t = (bet.type || "").toLowerCase();
-    switch (t) {
-        case "pass":
-        case "dont_pass":
-        case "come":
-        case "dont_come":
+    const typeKey = (bet.type || "").toString();
+    const def = getBetDefinition(typeKey);
+    const family = def ? def.family : typeKey.toLowerCase();
+    const point = bet.point != null ? bet.point : (bet.number != null ? bet.number : def?.number);
+
+    switch (family) {
+        case "line":
         case "field":
             return legalizeFlat(dollars, vt);
         case "place":
-            return legalizePlace(bet.point, dollars, vt);
+            return legalizePlace(point, dollars, vt);
         case "lay":
-            return legalizeLay(bet.point, dollars, vt);
+            return legalizeLay(point, dollars, vt);
         case "hardway":
         case "prop":
         case "proposition":
             return legalizeProp(dollars, vt);
         case "odds": {
             const baseFlat = clampInt(context?.baseFlat || 0);
-            return capOddsToPolicy(bet.point, baseFlat, dollars, vt);
+            return capOddsToPolicy(point, baseFlat, dollars, vt);
         }
         default:
             return legalizeFlat(dollars, vt);

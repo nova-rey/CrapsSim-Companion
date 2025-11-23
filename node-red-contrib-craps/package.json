@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-craps",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Node-RED nodes for designing, validating, and exporting CrapsSim-compatible strategies.",
   "license": "MIT",
   "keywords": [
@@ -32,6 +32,9 @@
       "var-seed": "vars/var-seed.js",
       "var-table": "vars/var-table.js"
     }
+  },
+  "scripts": {
+    "test": "node test/bet_surface.test.js"
   },
   "dependencies": {},
   "author": "Nova+Rey",

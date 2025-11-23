@@ -1,4 +1,28 @@
+const { getBetDefinition, isSupported, allowedNumbers } = require("../lib/bet_surface");
+
+const hardwayNumbers = new Set([4, 6, 8, 10]);
+
 module.exports = function(RED) {
+    function resolveCanonical(kind, number) {
+        const k = String(kind || "").toLowerCase();
+        const n = Number(number);
+        const hasHardwayPoint = hardwayNumbers.has(n) || allowedNumbers.has(n);
+        switch (k) {
+            case "hardway": return hasHardwayPoint ? `hardway_${n}` : null;
+            case "any7": return "prop_any7";
+            case "anycraps": return "prop_any_craps";
+            case "yo11": return "prop_yo11";
+            case "aces": return "prop_aces";
+            case "boxcars": return "prop_boxcars";
+            case "acedeuce": return "prop_ace_deuce";
+            case "horn": return "prop_horn";
+            case "hornhigh": return "prop_horn_high";
+            case "hop": return "prop_hop_generic";
+            case "prop": return "prop_other";
+            default: return null;
+        }
+    }
+
     function BetPropNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
@@ -24,7 +48,7 @@ module.exports = function(RED) {
         node.on("input", function(msg, send, done) {
             try {
                 const kind   = config.propKind || "Hardway";
-                const number = (kind === "Hardway" && config.number !== "" && config.number !== null)
+                const numberRaw = (kind === "Hardway" && config.number !== "" && config.number !== null)
                 ? Number(config.number) : undefined;
                 const betId  = (config.betId || "").trim();
                 const note   = (config.note || "").trim();
@@ -40,14 +64,30 @@ module.exports = function(RED) {
                     unitType = fed.unitType || "units";
                 }
 
+                const canonical = resolveCanonical(kind, numberRaw);
+                if (!canonical) { node.error(`bet-prop: unknown prop kind '${kind}' or missing number`); return done(); }
+                const def = getBetDefinition(canonical);
+                if (!def) { node.error(`bet-prop: bet type '${canonical}' not found in catalog`); return done(); }
+
+                const number = Number.isFinite(numberRaw) ? numberRaw : (def.number !== undefined ? def.number : undefined);
+                if (def.family === "hardway" && !hardwayNumbers.has(Number(number))) {
+                    node.error(`bet-prop: number required for hardway bet '${canonical}'`);
+                    return done();
+                }
+
+                if (!isSupported(canonical)) {
+                    node.warn(`Bet type '${canonical}' is currently unsupported and may be ignored by the exporter.`);
+                }
+
                 msg.recipe = msg.recipe || { steps: [] };
-                const step = { type: kind, amount, unitType };
-                if (number !== undefined && !Number.isNaN(number)) step.number = number;
+                const step = { type: canonical, amount, unitType };
+                if (number !== undefined && !Number.isNaN(number)) step.number = Number(number);
                 if (betId) step.betId = betId;
                 if (note)  step.note  = note;
 
                 msg.recipe.steps.push(step);
-                node.status({fill:"green", shape:"dot", text:`${kind}${step.number? " "+step.number:""}: ${amount} ${unitType}`});
+                const label = def.friendly_name || canonical;
+                node.status({fill:"green", shape:"dot", text:`${label}${step.number? " "+step.number:""}: ${amount} ${unitType}`});
                 send(msg); done();
             } catch (err) { done(err); }
         });
