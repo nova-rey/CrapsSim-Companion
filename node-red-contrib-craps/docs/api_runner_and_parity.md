@@ -1,6 +1,6 @@
 # API Runner & Parity Mode
 
-The API Runner executes a compiled `strategy_config` against the CrapsSim Engine HTTP API. Phase 5 adds parity mode for deterministic dice scripts alongside the normal random-roll behavior.
+The **Run: Engine API Simulation** node executes a compiled `strategy_config` against the CrapsSim Engine HTTP API. Phase 5 adds parity mode for deterministic dice scripts alongside the normal random-roll behavior.
 
 ## Normal mode recap
 1. Input: `msg.strategy_config` (from Strategy Compiler). Optional overrides: `msg.rolls`/`msg.runs`, `msg.seed`, `msg.profile_id`, `msg.api_config`.

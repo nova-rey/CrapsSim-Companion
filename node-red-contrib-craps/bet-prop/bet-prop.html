@@ -51,23 +51,23 @@
 
 <script type="text/html" data-help-name="bet-prop">
   <h3>What this node does</h3>
-  <p>Creates prop-family bet entries aligned with CrapsSim prop verbs. Current options support Hardway bets with required numbers.</p>
+  <p>Creates CrapsSim-aligned prop entries for the supported Hardway bets so they flow into <b>Compile Strategy</b> and the Engine/vanilla exporters.</p>
 
   <h3>Inputs</h3>
   <ul>
-    <li><b>Prop kind</b>: Hardway wagers on 4, 6, 8, or 10. The point selector only appears for Hardways.</li>
-    <li><b>Amount source</b>: <b>Fixed</b> uses the Amount and Units fields. <b>Feed</b> pulls amount+unit from <code>msg.var</code>, <code>msg.vars[betId]</code>, or <code>msg.amount/msg.unitType</code>.</li>
+    <li><b>Prop kind</b>: Hardway wagers on 4, 6, 8, or 10. The point selector appears only for Hardways.</li>
+    <li><b>Amount source</b>: <b>Fixed</b> uses the Amount and Units fields. <b>Feed</b> pulls <code>amount</code> + <code>unitType</code> from <code>msg.var.value</code>, <code>msg.vars[betId]</code>, or <code>msg.amount</code>/<code>msg.unitType</code>.</li>
     <li><b>Bet ID</b>/<b>Note</b>: Optional metadata applied to the generated bet step.</li>
   </ul>
 
   <h3>Outputs</h3>
-  <p>Appends a prop bet step to <code>msg.recipe.steps</code> with the selected kind, amount, unitType, hardway number, and optional betId/note. The message continues downstream to Compile Strategy.</p>
+  <p>Appends a Hardway bet step to <code>msg.recipe.steps</code> with the kind, amount, unitType, number, and optional betId/note. The message continues downstream to <b>Compile Strategy</b>.</p>
 
   <h3>Errors</h3>
   <ul>
     <li>Omitting a number for Hardway bets.</li>
     <li>Using <b>Feed</b> without providing amount/unitType via message variables.</li>
-    <li>Selecting a prop kind not supported by the current CrapsSim bet surface.</li>
+    <li>Selecting a prop kind that is not supported by the current CrapsSim bet surface (only Hardways are mapped).</li>
   </ul>
 </script>
 

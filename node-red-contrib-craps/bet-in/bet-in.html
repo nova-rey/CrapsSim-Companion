@@ -10,16 +10,16 @@
 
 <script type="text/html" data-help-name="bet-in">
   <h3>What this node does</h3>
-  <p>Stores an incoming bet amount and unit type under a Bet ID so other betting nodes can reference it when configured to use a feed.</p>
+  <p>Stores an incoming bet amount and unit type under a Bet ID so later bet nodes can pull the value when configured for feeds.</p>
 
   <h3>Inputs</h3>
   <ul>
-    <li><b>Bet ID</b>: Label to store the fed value.</li>
+    <li><b>Bet ID</b>: Label used as the lookup key.</li>
     <li><b>Message fields</b>: <code>msg.value</code> (integer amount) and <code>msg.unitType</code> (<code>unit</code> or <code>dollars</code>). Optional <code>msg.var</code> metadata is preserved.</li>
   </ul>
 
   <h3>Outputs</h3>
-  <p>No output wires. The value is saved in flow context (<code>__betFeed</code>) and status shows the latest amount and units.</p>
+  <p>No output wires. The value is saved in flow context (<code>__betFeed</code>), and node status shows the latest amount and units for the Bet ID.</p>
 
   <h3>Errors</h3>
   <ul>
