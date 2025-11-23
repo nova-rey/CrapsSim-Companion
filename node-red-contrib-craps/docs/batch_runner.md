@@ -1,6 +1,6 @@
 # Batch Runner
 
-The Batch Runner executes a compiled `strategy_config` across multiple seeds using the CrapsSim Engine HTTP API and aggregates the results.
+The **Run: Batch Simulation** node executes a compiled `strategy_config` across multiple seeds using the CrapsSim Engine HTTP API and aggregates the results.
 
 ## Inputs
 - `msg.strategy_config` (required) from the Strategy Compiler.

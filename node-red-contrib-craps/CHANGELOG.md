@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- Phase 6 UI/UX polish: palette categories updated (Craps: Strategy Builder / Craps: Execution) with refreshed node labels.
+- Standardized node help text and documentation to match the current UI; behavior unchanged.
+
 ## 1.3.0
 - Added `craps-api-config` config node for CrapsSim Engine API defaults (base URL, profile, seed mode, timeout, auth token).
 - Added `api-runner` node that executes `strategy_config` against the Engine HTTP API, emitting `sim_result` + `sim_journal` and optional file-ready NDJSON output.

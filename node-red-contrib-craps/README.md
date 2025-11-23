@@ -8,6 +8,16 @@ No coding required—just drag, drop, and connect blocks.
 
 This node pack exposes a supported-only bet surface aligned with the CrapsSim Engine API. For the full list of supported bets and their mappings, see [docs/bet_surface_capabilities.md](./docs/bet_surface_capabilities.md).
 
+## Palette and node overview (Phase 6 UI/UX)
+
+- **Palette categories:**
+  - **Craps: Strategy Builder** for bet construction, utility, and compilation nodes.
+  - **Craps: Execution** for simulation/export nodes.
+- **Major nodes and labels:**
+  - Builder: **Bet: Line/Place/Lay/Odds**, **Bet: Props/Hardways/Hops**, **Bet Variable**, **Clear Bets**, **Compile Strategy**.
+  - Execution: **Run: Engine API Simulation**, **Run: Batch Simulation**, **Run: Export to CrapsSim (Legacy)**.
+- **Typical flow:** Bet nodes → **Compile Strategy** → **Run: Engine API Simulation** (optionally followed by **Run: Batch Simulation** for multi-seed runs).
+
 ## Phase 5 Overview (Odds, Parity, Batch)
 
 - **Odds v1:** Line and Come odds (`odds_pass_line`, `odds_dont_pass`, `odds_come`, `odds_dont_come`) map to the Engine API `odds` verb with the correct base. Odds are Engine-only; vanilla export rejects them explicitly.

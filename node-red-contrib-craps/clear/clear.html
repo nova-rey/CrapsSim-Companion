@@ -99,7 +99,7 @@
 
 <script type="text/x-red" data-help-name="clear">
   <h3>What this node does</h3>
-  <p>Filters or removes bets inside the Node-RED flow (on <code>msg.bets</code>) without calling any CrapsSim clear API.</p>
+  <p>Filters or removes bets carried in the Node-RED message (<code>msg.bets</code>) without issuing any CrapsSim HTTP clear call.</p>
 
   <h3>Inputs</h3>
   <ul>
@@ -109,7 +109,7 @@
   </ul>
 
   <h3>Outputs</h3>
-  <p>Passes the message with <code>msg.bets</code> filtered according to the selection and <code>msg.cleared</code> reporting how many entries were removed.</p>
+  <p>Passes the message forward with <code>msg.bets</code> filtered according to the selection and <code>msg.cleared</code> reporting how many entries were removed.</p>
 
   <h3>Errors</h3>
   <ul>
