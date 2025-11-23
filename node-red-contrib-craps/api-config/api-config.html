@@ -1,0 +1,68 @@
+<script type="text/html" data-template-name="craps-api-config">
+  <div class="form-row">
+    <label for="node-config-input-base_url"><i class="fa fa-link"></i> Base URL</label>
+    <input type="text" id="node-config-input-base_url" placeholder="http://127.0.0.1:8000">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-profile_id"><i class="fa fa-user"></i> Profile ID</label>
+    <input type="text" id="node-config-input-profile_id" placeholder="default">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-default_seed_mode"><i class="fa fa-random"></i> Seed Mode</label>
+    <select id="node-config-input-default_seed_mode">
+      <option value="fixed">Fixed</option>
+      <option value="random">Random</option>
+      <option value="from_msg">From msg</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-seed"><i class="fa fa-hashtag"></i> Seed (when fixed)</label>
+    <input type="number" id="node-config-input-seed">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-timeout_ms"><i class="fa fa-clock-o"></i> Timeout (ms)</label>
+    <input type="number" id="node-config-input-timeout_ms" placeholder="5000">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-retries"><i class="fa fa-repeat"></i> Retries</label>
+    <input type="number" id="node-config-input-retries" placeholder="0">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-retry_backoff_ms"><i class="fa fa-hourglass-half"></i> Retry Backoff (ms)</label>
+    <input type="number" id="node-config-input-retry_backoff_ms" placeholder="0">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-auth_token"><i class="fa fa-key"></i> Auth Token</label>
+    <input type="text" id="node-config-input-auth_token">
+  </div>
+</script>
+
+<script type="text/html" data-help-name="craps-api-config">
+  <p>Holds shared configuration for CrapsSim Engine HTTP API calls.</p>
+  <ul>
+    <li><b>Base URL</b>: Prefix for all Engine API calls.</li>
+    <li><b>Profile ID</b>: Optional profile passed to <code>/session/start</code>.</li>
+    <li><b>Seed Mode</b>: Fixed, random, or taken from incoming messages.</li>
+    <li><b>Timeout</b>: Per-request timeout in milliseconds.</li>
+    <li><b>Auth Token</b>: Optional bearer token to send with requests.</li>
+  </ul>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType("craps-api-config", {
+    category: "config",
+    defaults: {
+      base_url: { value: "http://127.0.0.1:8000", required: true },
+      profile_id: { value: "default" },
+      default_seed_mode: { value: "random" },
+      seed: { value: "" },
+      timeout_ms: { value: 5000 },
+      retries: { value: 0 },
+      retry_backoff_ms: { value: 0 },
+      auth_token: { value: "" }
+    },
+    label: function() {
+      return this.base_url ? `Craps API @ ${this.base_url}` : "Craps API Config";
+    }
+  });
+</script>

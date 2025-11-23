@@ -1,0 +1,53 @@
+<script type="text/html" data-template-name="craps-api-runner">
+  <div class="form-row">
+    <label for="node-input-apiConfig"><i class="fa fa-cog"></i> API Config</label>
+    <input type="text" id="node-input-apiConfig" placeholder="Select api config">
+  </div>
+  <div class="form-row">
+    <label for="node-input-rolls"><i class="fa fa-repeat"></i> Rolls</label>
+    <input type="number" id="node-input-rolls" placeholder="100">
+  </div>
+  <div class="form-row">
+    <label for="node-input-strict_mode"><i class="fa fa-exclamation-triangle"></i> Strict Mode</label>
+    <input type="checkbox" id="node-input-strict_mode">
+  </div>
+  <div class="form-row">
+    <label for="node-input-prepare_file_output"><i class="fa fa-file-text-o"></i> Prepare File Output</label>
+    <input type="checkbox" id="node-input-prepare_file_output">
+  </div>
+  <div class="form-row">
+    <label for="node-input-label"><i class="fa fa-tag"></i> Label</label>
+    <input type="text" id="node-input-label" placeholder="optional label">
+  </div>
+</script>
+
+<script type="text/html" data-help-name="craps-api-runner">
+  <p>Runs a compiled strategy_config against the CrapsSim Engine HTTP API.</p>
+  <ul>
+    <li>Requires <code>msg.strategy_config</code> from the Strategy Compiler.</li>
+    <li>Calls <code>/session/start</code>, <code>/session/apply_action</code>, <code>/session/roll</code>, and <code>/end_session</code>.</li>
+    <li>Outputs <code>msg.sim_result</code>, <code>msg.sim_journal</code>, and sets <code>msg.payload</code>.</li>
+    <li>If <b>Prepare File Output</b> is enabled, <code>msg.file_output</code> and <code>msg.filename</code> are populated for downstream file nodes.</li>
+  </ul>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType("craps-api-runner", {
+    category: "craps",
+    color: "#FFE6CC",
+    icon: "font-awesome/fa-play-circle",
+    inputs: 1,
+    outputs: 1,
+    defaults: {
+      apiConfig: { value: "", type: "craps-api-config", required: true },
+      rolls: { value: 100 },
+      strict_mode: { value: false },
+      prepare_file_output: { value: false },
+      label: { value: "" }
+    },
+    label: function() {
+      if (this.label) return this.label;
+      return this.rolls ? `API runner (${this.rolls} rolls)` : "Craps API runner";
+    }
+  });
+</script>
