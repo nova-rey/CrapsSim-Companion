@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0
+- Added `craps-api-config` config node for CrapsSim Engine API defaults (base URL, profile, seed mode, timeout, auth token).
+- Added `api-runner` node that executes `strategy_config` against the Engine HTTP API, emitting `sim_result` + `sim_journal` and optional file-ready NDJSON output.
+- Documented Engine API Runner usage with end-to-end flows (debug view and file-output variants) and updated README walkthroughs.
+- Vanilla exporter path remains unchanged; the pack now supports both local export and HTTP execution side-by-side.
+
 ## 1.2.0
 - Added Strategy Compiler node that produces normalized `strategy_config` from bet graphs and table context.
 - Refactored vanilla exporter to consume `strategy_config` as the primary input while preserving the legacy recipe.steps path and output format.
