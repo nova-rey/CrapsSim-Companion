@@ -14,6 +14,7 @@
     "nodes": {
       "api-config": "api-config/api-config.js",
       "api-runner": "api-runner/api-runner.js",
+      "batch-runner": "api-runner/batch-runner.js",
       "bet-type": "bet-type/bet-type.js",
       "bet-prop": "bet-prop/bet-prop.js",
       "val-int": "val-int/val-int.js",
@@ -37,7 +38,7 @@
     }
   },
   "scripts": {
-    "test": "node test/bet_surface_spec.js && node test/bet_mapping_spec.js && node test/bet_surface.test.js && node test/strategy_compiler.test.js && node test/export_vanilla.test.js && node test/api_runner.test.js"
+    "test": "node test/bet_surface_spec.js && node test/bet_mapping_spec.js && node test/bet_surface.test.js && node test/strategy_compiler.test.js && node test/export_vanilla.test.js && node test/api_runner.test.js && node test/batch_runner_spec.js"
   },
   "dependencies": {
     "axios": "^1.7.7",

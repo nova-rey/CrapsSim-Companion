@@ -14,6 +14,20 @@ module.exports = function(RED) {
             case "dontcome":
             case "don'tcome":
             case "dont_come": return "dont_come";
+            case "passodds":
+            case "pass_odds":
+                return "odds_pass_line";
+            case "dontpassodds":
+            case "don'tpassodds":
+            case "dont_pass_odds":
+                return "odds_dont_pass";
+            case "comeodds":
+            case "come_odds":
+                return "odds_come";
+            case "dontcomeodds":
+            case "don'tcomeodds":
+            case "dont_come_odds":
+                return "odds_dont_come";
             case "field": return "field";
             case "place": return hasPoint ? `place_${n}` : null;
             case "lay": return hasPoint ? `lay_${n}` : null;
@@ -49,6 +63,7 @@ module.exports = function(RED) {
                 const numberRaw = (config.number !== "" && config.number !== null) ? Number(config.number) : undefined;
                 const betId  = (config.betId || "").trim();
                 const note   = (config.note || "").trim();
+                const working = Boolean(config.working);
 
                 let amount, unitType;
                 if (config.valueSource === "fixed") {
@@ -81,6 +96,7 @@ module.exports = function(RED) {
                 msg.recipe = msg.recipe || { steps: [] };
                 const step = { type: canonical, amount, unitType };
                 if (number !== undefined && !Number.isNaN(number)) step.number = Number(number);
+                if (working) step.working = true;
                 if (betId) step.betId = betId;
                 if (note)  step.note  = note;
 

@@ -79,4 +79,31 @@ const missingNumberBet = { key: "place_6", base_amount: 12, unit_type: "dollars"
 assert.throws(() => mapBetToApiAction(missingNumberBet, requiresNumberDef, { varTable }), /requires a valid number/);
 assert.throws(() => mapBetToVanillaSpec(missingNumberBet, requiresNumberDef, { varTable }), /requires a valid number/);
 
+const oddsSamples = [
+    { key: "odds_pass_line", number: undefined, base: "pass_line" },
+    { key: "odds_dont_pass", number: undefined, base: "dont_pass" },
+    { key: "odds_come", number: 6, base: "come" },
+    { key: "odds_dont_come", number: 8, base: "dont_come" }
+];
+
+for (const sample of oddsSamples) {
+    const def = getBetDefinition(sample.key);
+    const betEntry = buildBet(sample.key, 10, "dollars", sample.number);
+    const action = mapBetToApiAction(betEntry, def, { varTable });
+    assert.strictEqual(action.verb, "odds");
+    assert.strictEqual(action.args.base, sample.base);
+    assert(action.args.amount > 0);
+    if (def.requires_number) {
+        assert.strictEqual(action.args.number, sample.number);
+    } else {
+        assert.strictEqual(action.args.number, undefined);
+    }
+    assert.throws(() => mapBetToVanillaSpec(betEntry, def, { varTable }), /Odds bets are not yet supported/);
+}
+
+const missingOddsNumber = buildBet("odds_come", 5, "dollars");
+assert.throws(() => mapBetToApiAction(missingOddsNumber, getBetDefinition("odds_come"), { varTable }), /requires a valid number/);
+
+assert.throws(() => mapBetToApiAction({ key: "odds_unknown", base_amount: 5, unit_type: "dollars" }, null, { varTable }), UnknownBetError);
+
 console.log("bet_mapping helper round-trip tests passed");
