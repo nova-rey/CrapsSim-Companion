@@ -1,0 +1,132 @@
+[
+  {
+    "id": "2fd1e8f8b6e4dbf4",
+    "type": "tab",
+    "label": "Strategy: Hardway Demo",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "a3e64ff1b2d1813c",
+    "type": "comment",
+    "z": "2fd1e8f8b6e4dbf4",
+    "name": "Hardway 6 via strategy-compiler",
+    "info": "Shows bet-prop hardways feeding into the strategy-compiler and export-vanilla, producing strategy_config with hardway_6/8 entries.",
+    "x": 250,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "8eb3f54ed7056e9b",
+    "type": "inject",
+    "z": "2fd1e8f8b6e4dbf4",
+    "name": "trigger once",
+    "props": [
+      { "p": "payload" }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "str",
+    "x": 120,
+    "y": 140,
+    "wires": [["aa72e0e9350cb750"]]
+  },
+  {
+    "id": "aa72e0e9350cb750",
+    "type": "var-table",
+    "z": "2fd1e8f8b6e4dbf4",
+    "name": "table: $5",
+    "mode": "5",
+    "x": 300,
+    "y": 140,
+    "wires": [["f697d31f24f3e598"]]
+  },
+  {
+    "id": "f697d31f24f3e598",
+    "type": "bet-prop",
+    "z": "2fd1e8f8b6e4dbf4",
+    "propKind": "Hardway",
+    "number": "6",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "5",
+    "unitType": "units",
+    "note": "",
+    "x": 520,
+    "y": 140,
+    "wires": [["c8f2e1f4fba9123e"]]
+  },
+  {
+    "id": "c8f2e1f4fba9123e",
+    "type": "bet-prop",
+    "z": "2fd1e8f8b6e4dbf4",
+    "propKind": "Hardway",
+    "number": "8",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "5",
+    "unitType": "units",
+    "note": "",
+    "x": 740,
+    "y": 140,
+    "wires": [["73e3e1bb1b13a24d"]]
+  },
+  {
+    "id": "73e3e1bb1b13a24d",
+    "type": "strategy-compiler",
+    "z": "2fd1e8f8b6e4dbf4",
+    "strategyName": "HardwayDemo",
+    "notes": "",
+    "x": 980,
+    "y": 140,
+    "wires": [["f11c0fa86b0f0c2c", "0c0d5b754e1e53c7"]]
+  },
+  {
+    "id": "f11c0fa86b0f0c2c",
+    "type": "debug",
+    "z": "2fd1e8f8b6e4dbf4",
+    "name": "strategy_config",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "strategy_config",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1220,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "0c0d5b754e1e53c7",
+    "type": "export",
+    "z": "2fd1e8f8b6e4dbf4",
+    "name": "vanilla export",
+    "filename": "strategy_hardway.py",
+    "x": 1220,
+    "y": 180,
+    "wires": [["5b930da5f64021aa"]]
+  },
+  {
+    "id": "5b930da5f64021aa",
+    "type": "debug",
+    "z": "2fd1e8f8b6e4dbf4",
+    "name": "exported python",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1470,
+    "y": 180,
+    "wires": []
+  }
+]

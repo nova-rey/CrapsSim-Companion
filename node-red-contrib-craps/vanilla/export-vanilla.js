@@ -148,6 +148,8 @@ function buildCompFromSteps(steps, vt, warn) {
         let preDollars;
         if (typeof value === "object" && value !== null && ("units" in value || "dollars" in value)) {
             preDollars = dollarsFromUnitsOrLiteral(value, vt);
+        } else if (s.unitType === "units") {
+            preDollars = dollarsFromUnitsOrLiteral({ units: Number(value) }, vt);
         } else {
             preDollars = Number(value);
         }

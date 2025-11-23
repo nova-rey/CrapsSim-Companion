@@ -35,8 +35,36 @@ Phase 1 targets the current CrapsSim vanilla/API bet surface that exposes `BetPa
 
 ### Example Flows
 
-- `examples/simple_line_and_place_flow.json`: Pass Line plus Place 6/8 using canonical keys.
+- `examples/simple_line_and_place_flow.json`: Pass Line plus Place 6/8 using canonical keys with both the legacy recipe.debug path and the strategy compiler + exporter path for parity checks.
 - `examples/hardway_example_flow.json`: Hardway 6 and Hardway 8 via `bet-prop`.
+- `examples/strategy_simple_line_place.json`: Minimal Pass Line + Place 6/8 feeding strategy-compiler → export-vanilla with debug taps for `msg.strategy_config` and the exported Python.
+- `examples/strategy_hardway_demo.json`: Hardway 6/8 demonstrating how `bet-prop` → strategy-compiler → export-vanilla produces hardway bets in `strategy_config`.
+
+## What is `strategy_config`?
+
+`strategy_config` is the normalized object the node pack builds from your graph. Bet nodes emit canonical bet steps (with amounts and unit types), table nodes provide limits/multipliers, and the **Strategy Compiler** assembles everything into a single object that exporters and runners can consume.
+
+You usually do not edit `strategy_config` by hand; it is produced automatically. A typical object looks like:
+
+```json
+{
+  "strategy_name": "MyStrategy",
+  "table": { "mode": "10", "multiplier": 10, "bubble": false },
+  "bets": [
+    { "key": "pass_line", "base_amount": 10, "unit_type": "units" },
+    { "key": "place_6", "base_amount": 12, "unit_type": "dollars", "number": 6 }
+  ],
+  "metadata": { "created_by": "node-red-contrib-craps", "version": "1.2.0", "notes": "optional" }
+}
+```
+
+Exporters and runners read `strategy_config` to build CrapsSim components. Amounts expressed in `units` are scaled using the table multiplier; amounts in `dollars` are passed through directly.
+
+## Strategy Compiler node
+
+- **Inputs:** Expects `msg.recipe.steps` (emitted by bet nodes), plus optional `msg.varTable` and metadata (e.g., `msg.strategy_name`, `msg.strategy_notes`).
+- **Outputs:** Writes `msg.strategy_config` (and also `msg.payload`) containing the normalized strategy and table info.
+- **Usage:** Wire bet nodes → `strategy-compiler` → exporters/runners. You generally don’t need to know the internal schema beyond that; the node handles normalization and validation for you.
 
 📦 Nodes
 🎲 Bet Construction
@@ -118,7 +146,7 @@ export-vanilla
 
 Converts the recipe into a runnable Python module using CrapsSim’s strategy API (AggregateStrategy, BetDontPass, BetPlace, BetField, etc.).
 
-ℹ️ The exporter now prefers <code>msg.strategy_config</code> (assembled by the <b>strategy-compiler</b> node) as its primary input, but will fall back to <code>msg.recipe.steps</code> for legacy flows.
+ℹ️ The exporter now prefers <code>msg.strategy_config</code> (assembled by the <b>strategy-compiler</b> node) as its primary input, but will fall back to <code>msg.recipe.steps</code> for legacy flows. Wiring is unchanged: feed your bet nodes into the compiler, then into the exporter.
 
 Exports to a .py file via the File node.
 

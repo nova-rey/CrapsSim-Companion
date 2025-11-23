@@ -94,7 +94,8 @@
     "y": 120,
     "wires": [
       [
-        "97be96c7e1c3cdf0"
+        "97be96c7e1c3cdf0",
+        "cfe5e3d75c176f8e"
       ]
     ]
   },
@@ -113,6 +114,69 @@
     "statusType": "auto",
     "x": 1020,
     "y": 120,
+    "wires": []
+  },
+  {
+    "id": "cfe5e3d75c176f8e",
+    "type": "strategy-compiler",
+    "z": "af35e6b6f4b3e9c1",
+    "strategyName": "LinePlaceLegacy",
+    "notes": "",
+    "x": 1020,
+    "y": 180,
+    "wires": [
+      [
+        "7f98fc271c918b14",
+        "8c5ef4e233d79cb4"
+      ]
+    ]
+  },
+  {
+    "id": "7f98fc271c918b14",
+    "type": "debug",
+    "z": "af35e6b6f4b3e9c1",
+    "name": "strategy_config",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "strategy_config",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1230,
+    "y": 140,
+    "wires": []
+  },
+  {
+    "id": "8c5ef4e233d79cb4",
+    "type": "export",
+    "z": "af35e6b6f4b3e9c1",
+    "name": "vanilla export",
+    "filename": "legacy_line_place.py",
+    "x": 1240,
+    "y": 220,
+    "wires": [
+      [
+        "7a95c6a58cc05c71"
+      ]
+    ]
+  },
+  {
+    "id": "7a95c6a58cc05c71",
+    "type": "debug",
+    "z": "af35e6b6f4b3e9c1",
+    "name": "exported python",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1480,
+    "y": 220,
     "wires": []
   }
 ]
