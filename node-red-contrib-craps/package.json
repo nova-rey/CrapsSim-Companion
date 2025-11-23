@@ -37,7 +37,7 @@
     }
   },
   "scripts": {
-    "test": "node test/bet_surface.test.js && node test/strategy_compiler.test.js && node test/export_vanilla.test.js && node test/api_runner.test.js"
+    "test": "node test/bet_surface_spec.js && node test/bet_mapping_spec.js && node test/bet_surface.test.js && node test/strategy_compiler.test.js && node test/export_vanilla.test.js && node test/api_runner.test.js"
   },
   "dependencies": {
     "axios": "^1.7.7",

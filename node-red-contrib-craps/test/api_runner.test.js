@@ -21,8 +21,7 @@ function defaultMsg() {
             table: null,
             bets: [
                 { key: "pass_line", base_amount: 10, unit_type: "units" },
-                { key: "place_6", base_amount: 12, unit_type: "dollars", number: 6 },
-                { key: "place_8", base_amount: 12, unit_type: "dollars", number: 8 }
+                { key: "place_6", base_amount: 12, unit_type: "dollars", number: 6 }
             ]
         }
     };
@@ -34,7 +33,17 @@ async function testHappyPath() {
     const msg = defaultMsg();
 
     nock(apiConfig.base_url).post("/session/start").reply(200, { session_id: "abc", bankroll: 300 });
-    nock(apiConfig.base_url).post("/session/apply_action").times(3).reply(200, { ok: true });
+    const expectedVerbs = ["pass_line", "place"];
+    nock(apiConfig.base_url).post("/session/apply_action", (body) => {
+        const next = expectedVerbs.shift();
+        assert(next, "More apply_action calls than expected");
+        assert.strictEqual(body.verb, next, "Verb should come from mapping helper");
+        assert(body.args && body.args.amount > 0, "Amount should be positive");
+        if (body.verb === "place") {
+            assert.strictEqual(body.args.number, 6, "Place bet should include number");
+        }
+        return true;
+    }).twice().reply(200, { ok: true });
     nock(apiConfig.base_url).post("/session/roll").reply(200, { roll: 7, bankroll: 310 });
     nock(apiConfig.base_url).post("/session/roll").reply(200, { roll: 6, bankroll: 320 });
     nock(apiConfig.base_url).post("/session/roll").reply(200, { roll: 8, bankroll: 330 });
@@ -47,6 +56,8 @@ async function testHappyPath() {
         node,
         httpClient: require("axios")
     });
+
+    assert.strictEqual(expectedVerbs.length, 0, "All expected verbs should be exercised");
 
     assert(out.sim_result);
     assert.strictEqual(out.sim_result.strategy_name, "TestStrat");
@@ -70,7 +81,7 @@ async function testAggregatedErrors() {
 
     nock(apiConfig.base_url).post("/session/start").reply(200, { session_id: "abc", bankroll: 100 });
     nock(apiConfig.base_url).post("/session/apply_action").reply(200, { errors: [{ code: "ILLEGAL_BET" }] });
-    nock(apiConfig.base_url).post("/session/apply_action").times(2).reply(200, {});
+    nock(apiConfig.base_url).post("/session/apply_action").reply(200, {});
     nock(apiConfig.base_url).post("/session/roll").once().reply(200, { bankroll: 110, errors: [{ code: "WARN" }] });
     nock(apiConfig.base_url).post("/end_session").reply(200, {});
 
