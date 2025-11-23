@@ -14,7 +14,8 @@ const strategy_config = {
     bets: [
         { key: "pass_line", base_amount: 10, unit_type: "units" },
         { key: "place_6", base_amount: 12, unit_type: "dollars", number: 6 },
-        { key: "place_8", base_amount: 12, unit_type: "dollars", number: 8 }
+        { key: "place_8", base_amount: 12, unit_type: "dollars", number: 8 },
+        { key: "hardway_6", base_amount: 5, unit_type: "dollars", number: 6 }
     ]
 };
 
@@ -24,10 +25,12 @@ assert(Array.isArray(errors) && errors.length === 0, `Unexpected errors: ${error
 assert(comp.maingame.line.some(b => b.key === "pass_line"), "Pass Line should be included");
 assert.strictEqual(comp.maingame.place[6], 12, "Place 6 should map dollars directly");
 assert.strictEqual(comp.maingame.place[8], 12, "Place 8 should map dollars directly");
+assert(comp.maingame.hard.some(b => b.number === 6), "Hardway 6 should be included");
 
 const py = helpers.generatePython("ExampleStrategy", comp, {});
 assert(py.includes("BetPassLine"), "Python output should include BetPassLine");
 assert(py.includes("BetPlace"), "Python output should include BetPlace");
+assert(py.includes("BetHardway"), "Python output should include BetHardway");
 
 console.log("export-vanilla strategy_config path passed");
 

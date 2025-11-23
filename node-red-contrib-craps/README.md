@@ -6,12 +6,13 @@ These nodes let you build strategies visually as a “recipe flow,” validate t
 
 No coding required—just drag, drop, and connect blocks.
 
+This node pack exposes a supported-only bet surface aligned with the CrapsSim Engine API. For the full list of supported bets and their mappings, see [docs/bet_surface_capabilities.md](./docs/bet_surface_capabilities.md).
+
 ## Bet Surface Overview (Phase 1)
 
-- `bet_surface.json` at the repo root is the single source of truth for every bet identifier used by the pack. Each entry includes a canonical key, the engine code it maps to, and whether it is currently supported for export.
+- `bet_surface.json` at the repo root is the single source of truth for every bet identifier used by the pack. Each entry includes a canonical key, the engine code it maps to, and is currently supported for export.
 - Bet nodes (`bet-type`, `bet-prop`, `bet-in`, `clear`) emit canonical keys such as `pass_line`, `place_6`, or `hardway_8`. Exporters and validators use those keys to align with CrapsSim’s bet classes.
 - Supported today: Pass/Don’t Pass, Come/Don’t Come, Field, numbered Place/Lay (4/5/6/8/9/10), and Hardways (4/6/8/10).
-- Odds and non-hardway prop bets stay visible in the UI for parity but are marked `supported: false` and will emit warnings until the CrapsSim engine/API exposes matching bet types.
 
 ### Supported Bets (Phase 1)
 
