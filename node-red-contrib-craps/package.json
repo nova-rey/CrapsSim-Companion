@@ -22,6 +22,7 @@
       "maingame-marker": "maingame-marker/maingame-marker.js",
       "endgame-marker": "endgame-marker/endgame-marker.js",
       "roll-marker": "roll-marker/roll-marker.js",
+      "strategy-compiler": "strategy-compiler/strategy-compiler.js",
 
 
       "validator": "vanilla/validator-vanilla.js",
@@ -34,7 +35,7 @@
     }
   },
   "scripts": {
-    "test": "node test/bet_surface.test.js"
+    "test": "node test/bet_surface.test.js && node test/strategy_compiler.test.js && node test/export_vanilla.test.js"
   },
   "dependencies": {},
   "author": "Nova+Rey",

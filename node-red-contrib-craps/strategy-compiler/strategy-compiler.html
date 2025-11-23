@@ -1,0 +1,35 @@
+<script type="text/html" data-template-name="strategy-compiler">
+  <div class="form-row">
+    <label for="node-input-strategyName"><i class="fa fa-flag"></i> Strategy Name</label>
+    <input type="text" id="node-input-strategyName" placeholder="MyStrategy">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-notes"><i class="fa fa-sticky-note"></i> Notes</label>
+    <input type="text" id="node-input-notes" placeholder="optional">
+  </div>
+</script>
+
+<script type="text/html" data-help-name="strategy-compiler">
+  <p>Builds a normalized <code>strategy_config</code> object from <code>msg.recipe.steps</code> and table settings.</p>
+  <p>If <code>msg.varTable</code> is present, it is used; otherwise defaults match the vanilla exporter.</p>
+</script>
+
+<script type="text/javascript">
+  (function(){
+    RED.nodes.registerType("strategy-compiler", {
+      category: "craps",
+      color: "#F2F1FF",
+      icon: "font-awesome/fa-cogs",
+      defaults: {
+        strategyName: { value: "MyStrategy" },
+        notes: { value: "" }
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function() {
+        return this.strategyName || "strategy-compiler";
+      }
+    });
+  })();
+</script>
