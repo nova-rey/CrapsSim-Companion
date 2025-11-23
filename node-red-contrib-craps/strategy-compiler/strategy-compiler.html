@@ -1,4 +1,4 @@
-<script type="text/html" data-template-name="strategy-compiler">
+<script type="text/html" data-template-name="strategy-compiler" data-label="Compile Strategy">
   <div class="form-row">
     <label for="node-input-strategyName"><i class="fa fa-flag"></i> Strategy Name</label>
     <input type="text" id="node-input-strategyName" placeholder="MyStrategy">
@@ -11,24 +11,40 @@
 </script>
 
 <script type="text/html" data-help-name="strategy-compiler">
-  <p>Builds a normalized <code>strategy_config</code> object from <code>msg.recipe.steps</code> and table settings.</p>
-  <p>If <code>msg.varTable</code> is present, it is used; otherwise defaults match the vanilla exporter.</p>
+  <h3>What this node does</h3>
+  <p>Collects bet steps from prior nodes and compiles them into a normalized <code>msg.strategy_config</code> for simulation or export.</p>
+
+  <h3>Inputs</h3>
+  <ul>
+    <li><b>Strategy Name</b> and <b>Notes</b> are included in the compiled config.</li>
+    <li><b>Message fields</b>: consumes <code>msg.recipe.steps</code> (built by bet nodes) and <code>msg.varTable</code> when provided; otherwise uses default table rules.</li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <p>Sets <code>msg.strategy_config</code> and forwards the message for execution/export nodes. Also preserves the input bet recipe.</p>
+
+  <h3>Errors</h3>
+  <ul>
+    <li>Missing or empty <code>msg.recipe.steps</code>.</li>
+    <li>Unsupported bet types or table settings that cannot be normalized.</li>
+  </ul>
 </script>
 
 <script type="text/javascript">
   (function(){
     RED.nodes.registerType("strategy-compiler", {
-      category: "craps",
-      color: "#F2F1FF",
-      icon: "font-awesome/fa-cogs",
+      category: "Craps: Strategy Builder",
+      color: "#4C8BF5",
+      icon: "icons/builder-node.svg",
       defaults: {
         strategyName: { value: "MyStrategy" },
         notes: { value: "" }
       },
       inputs: 1,
       outputs: 1,
+      paletteLabel: "Compile Strategy",
       label: function() {
-        return this.strategyName || "strategy-compiler";
+        return this.strategyName || "Compile Strategy";
       }
     });
   })();

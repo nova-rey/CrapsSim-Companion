@@ -1,19 +1,20 @@
 <script type="text/javascript">
 RED.nodes.registerType('export', {
-  category: 'craps',
-  color: '#FDEBD0',
+  category: 'Craps: Execution',
+  color: '#6A4CCF',
   defaults: {
     name: { value: "" },
     filename: { value: "strategy.py" }
   },
   inputs: 1,
   outputs: 1,
-  icon: "font-awesome/fa-upload",
-  label: function() { return this.name || "export"; }
+  icon: "icons/execution-node.svg",
+  paletteLabel: "Run: Export to CrapsSim (Legacy)",
+  label: function() { return this.name || "Run: Export (Legacy)"; }
 });
 </script>
 
-<script type="text/x-red" data-template-name="export">
+<script type="text/x-red" data-template-name="export" data-label="Run: Export to CrapsSim (Legacy)">
   <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="">
@@ -28,6 +29,21 @@ RED.nodes.registerType('export', {
 </script>
 
 <script type="text/x-red" data-help-name="export">
-  <p>Exports the incoming normalized bet graph to a CrapsSim Python strategy.</p>
-  <p>Uses <code>var-table</code> rules to convert units → dollars and legalize non-bubble bets.</p>
+  <h3>What this node does</h3>
+  <p>Generates a legacy CrapsSim-compatible Python strategy file from the compiled bet recipe.</p>
+
+  <h3>Inputs</h3>
+  <ul>
+    <li><b>Filename</b>: Target filename for the exported strategy.</li>
+    <li><b>Message fields</b>: expects <code>msg.recipe.steps</code> and optional <code>msg.varTable</code> to convert units to dollars and legalize bets.</li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <p>Emits the generated Python code on <code>msg.payload</code> and forwards the filename on <code>msg.filename</code>.</p>
+
+  <h3>Errors</h3>
+  <ul>
+    <li>Missing or invalid bet recipe.</li>
+    <li>Unsupported bet types for the legacy exporter.</li>
+  </ul>
 </script>
