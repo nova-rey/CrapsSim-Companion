@@ -1,0 +1,99 @@
+[
+  {
+    "id": "58df9bb3a8e6ff8d",
+    "type": "tab",
+    "label": "Unsupported Bets (Warnings)",
+    "disabled": false,
+    "info": "Internal sanity flow to confirm unsupported bets warn without breaking the recipe."
+  },
+  {
+    "id": "e5676d53473b6216",
+    "type": "comment",
+    "z": "58df9bb3a8e6ff8d",
+    "name": "Expect warnings only",
+    "info": "Uses prop_any7 and odds_pass_line to confirm Phase 1 warns for unsupported bets while still producing recipe steps.",
+    "x": 210,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "38c5ec68f0d2a167",
+    "type": "inject",
+    "z": "58df9bb3a8e6ff8d",
+    "name": "trigger once",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "str",
+    "x": 140,
+    "y": 120,
+    "wires": [
+      [
+        "e41d4362bdf16635"
+      ]
+    ]
+  },
+  {
+    "id": "e41d4362bdf16635",
+    "type": "bet-prop",
+    "z": "58df9bb3a8e6ff8d",
+    "propKind": "Any7",
+    "number": "",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "5",
+    "unitType": "units",
+    "note": "",
+    "x": 360,
+    "y": 120,
+    "wires": [
+      [
+        "b8bce6635a5a5bcb"
+      ]
+    ]
+  },
+  {
+    "id": "b8bce6635a5a5bcb",
+    "type": "bet-type",
+    "z": "58df9bb3a8e6ff8d",
+    "kind": "PassOdds",
+    "number": "",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "10",
+    "unitType": "units",
+    "note": "",
+    "x": 580,
+    "y": 120,
+    "wires": [
+      [
+        "766e6d5d60b7b25e"
+      ]
+    ]
+  },
+  {
+    "id": "766e6d5d60b7b25e",
+    "type": "debug",
+    "z": "58df9bb3a8e6ff8d",
+    "name": "recipe steps (with warnings)",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "recipe.steps",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 850,
+    "y": 120,
+    "wires": []
+  }
+]

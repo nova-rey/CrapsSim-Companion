@@ -6,9 +6,37 @@ These nodes let you build strategies visually as a “recipe flow,” validate t
 
 No coding required—just drag, drop, and connect blocks.
 
-📚 Bet Surface Catalog
+## Bet Surface Overview (Phase 1)
 
-The pack now ships with a canonical bet catalog (`bet_surface.json`) that all bet nodes share. Each bet emits a canonical key that maps to CrapsSim’s engine identifiers. Phase 1 supports line bets (pass_line, dont_pass, come, dont_come), field, place and lay numbers (4/5/6/8/9/10), and hardways (4/6/8/10). Odds and non-hardway prop bets are listed in the catalog for UI parity but are marked unsupported and will warn during validation/export.
+- `bet_surface.json` at the repo root is the single source of truth for every bet identifier used by the pack. Each entry includes a canonical key, the engine code it maps to, and whether it is currently supported for export.
+- Bet nodes (`bet-type`, `bet-prop`, `bet-in`, `clear`) emit canonical keys such as `pass_line`, `place_6`, or `hardway_8`. Exporters and validators use those keys to align with CrapsSim’s bet classes.
+- Supported today: Pass/Don’t Pass, Come/Don’t Come, Field, numbered Place/Lay (4/5/6/8/9/10), and Hardways (4/6/8/10).
+- Odds and non-hardway prop bets stay visible in the UI for parity but are marked `supported: false` and will emit warnings until the CrapsSim engine/API exposes matching bet types.
+
+### Supported Bets (Phase 1)
+
+| Family  | Canonical keys (supported) |
+|---------|---------------------------|
+| Line    | `pass_line`, `dont_pass`, `come`, `dont_come` |
+| Field   | `field` |
+| Place   | `place_4`, `place_5`, `place_6`, `place_8`, `place_9`, `place_10` |
+| Lay     | `lay_4`, `lay_5`, `lay_6`, `lay_8`, `lay_9`, `lay_10` |
+| Hardway | `hardway_4`, `hardway_6`, `hardway_8`, `hardway_10` |
+
+### Adding or Deprecating Bet Types
+
+1. Add or edit entries in `bet_surface.json`, setting `supported` to `true` when the CrapsSim engine/API can accept the bet and `false` when the UI should show it but exporters must ignore it.
+2. Update exporters/validators as needed in future phases to map new bets to CrapsSim classes.
+3. Keep this README and example flows in sync with the catalog so users can see what is available at a glance.
+
+### Version Compatibility
+
+Phase 1 targets the current CrapsSim vanilla/API bet surface that exposes `BetPassLine`, `BetDontPass`, `BetCome`, `BetDontCome`, `BetPlace`, `BetLay`, `BetField`, and `BetHardway`. If CrapsSim adds or removes bet types, update `bet_surface.json`, the supported list above, and any related exporters/validators to stay aligned.
+
+### Example Flows
+
+- `examples/simple_line_and_place_flow.json`: Pass Line plus Place 6/8 using canonical keys.
+- `examples/hardway_example_flow.json`: Hardway 6 and Hardway 8 via `bet-prop`.
 
 📦 Nodes
 🎲 Bet Construction

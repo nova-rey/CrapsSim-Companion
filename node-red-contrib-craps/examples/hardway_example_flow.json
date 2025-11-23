@@ -1,0 +1,99 @@
+[
+  {
+    "id": "f2da65fd51efc4d0",
+    "type": "tab",
+    "label": "Hardway Examples",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "0c07cd5d63c7a53f",
+    "type": "comment",
+    "z": "f2da65fd51efc4d0",
+    "name": "Hardway bets via canonical keys",
+    "info": "Exercises bet-prop with hardway_6 and hardway_8. Uses canonical keys from bet_surface and outputs msg.recipe.steps.",
+    "x": 250,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "0d86ddf857fb33e3",
+    "type": "inject",
+    "z": "f2da65fd51efc4d0",
+    "name": "trigger once",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "str",
+    "x": 140,
+    "y": 120,
+    "wires": [
+      [
+        "66b16ba53e8cd9ce"
+      ]
+    ]
+  },
+  {
+    "id": "66b16ba53e8cd9ce",
+    "type": "bet-prop",
+    "z": "f2da65fd51efc4d0",
+    "propKind": "Hardway",
+    "number": "6",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "5",
+    "unitType": "units",
+    "note": "",
+    "x": 380,
+    "y": 120,
+    "wires": [
+      [
+        "62e6a6af8c8c28f4"
+      ]
+    ]
+  },
+  {
+    "id": "62e6a6af8c8c28f4",
+    "type": "bet-prop",
+    "z": "f2da65fd51efc4d0",
+    "propKind": "Hardway",
+    "number": "8",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "5",
+    "unitType": "units",
+    "note": "",
+    "x": 600,
+    "y": 120,
+    "wires": [
+      [
+        "2c8b3f0f79fe8576"
+      ]
+    ]
+  },
+  {
+    "id": "2c8b3f0f79fe8576",
+    "type": "debug",
+    "z": "f2da65fd51efc4d0",
+    "name": "recipe steps",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "recipe.steps",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 840,
+    "y": 120,
+    "wires": []
+  }
+]
