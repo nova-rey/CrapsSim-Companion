@@ -118,6 +118,8 @@ export-vanilla
 
 Converts the recipe into a runnable Python module using CrapsSim’s strategy API (AggregateStrategy, BetDontPass, BetPlace, BetField, etc.).
 
+ℹ️ The exporter now prefers <code>msg.strategy_config</code> (assembled by the <b>strategy-compiler</b> node) as its primary input, but will fall back to <code>msg.recipe.steps</code> for legacy flows.
+
 Exports to a .py file via the File node.
 
 Harness block at the bottom lets you run the strategy immediately with CrapsSim’s Table.
