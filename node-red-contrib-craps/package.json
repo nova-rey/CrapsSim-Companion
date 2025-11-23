@@ -12,6 +12,8 @@
   ],
   "node-red": {
     "nodes": {
+      "api-config": "api-config/api-config.js",
+      "api-runner": "api-runner/api-runner.js",
       "bet-type": "bet-type/bet-type.js",
       "bet-prop": "bet-prop/bet-prop.js",
       "val-int": "val-int/val-int.js",
@@ -35,9 +37,12 @@
     }
   },
   "scripts": {
-    "test": "node test/bet_surface.test.js && node test/strategy_compiler.test.js && node test/export_vanilla.test.js"
+    "test": "node test/bet_surface.test.js && node test/strategy_compiler.test.js && node test/export_vanilla.test.js && node test/api_runner.test.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "axios": "^1.7.7",
+    "nock": "^13.5.0"
+  },
   "author": "Nova+Rey",
   "repository": {
     "type": "git",
