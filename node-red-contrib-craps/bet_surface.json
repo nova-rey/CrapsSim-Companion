@@ -1,285 +1,202 @@
 [
   {
     "key": "pass_line",
-    "engine_code": "pass_line",
-    "friendly_name": "Pass Line",
     "family": "line",
-    "supports_odds": true,
-    "supported": true
+    "engine_verb": "pass_line",
+    "label": "Pass Line",
+    "ui_group": "main",
+    "args_schema": { "required": ["amount"], "optional": [] }
   },
   {
     "key": "dont_pass",
-    "engine_code": "dont_pass",
-    "friendly_name": "Don't Pass",
     "family": "line",
-    "supports_odds": true,
-    "supported": true
+    "engine_verb": "dont_pass",
+    "label": "Don't Pass",
+    "ui_group": "main",
+    "args_schema": { "required": ["amount"], "optional": [] }
   },
   {
     "key": "come",
-    "engine_code": "come",
-    "friendly_name": "Come",
     "family": "line",
-    "supports_odds": true,
-    "supported": true
+    "engine_verb": "come",
+    "label": "Come",
+    "ui_group": "main",
+    "args_schema": { "required": ["amount"], "optional": [] }
   },
   {
     "key": "dont_come",
-    "engine_code": "dont_come",
-    "friendly_name": "Don't Come",
     "family": "line",
-    "supports_odds": true,
-    "supported": true
+    "engine_verb": "dont_come",
+    "label": "Don't Come",
+    "ui_group": "main",
+    "args_schema": { "required": ["amount"], "optional": [] }
   },
   {
     "key": "field",
-    "engine_code": "field",
-    "friendly_name": "Field",
     "family": "field",
-    "supported": true
+    "engine_verb": "field",
+    "label": "Field",
+    "ui_group": "main",
+    "args_schema": { "required": ["amount"], "optional": [] }
   },
   {
     "key": "place_4",
-    "engine_code": "place",
-    "friendly_name": "Place 4",
     "family": "place",
+    "engine_verb": "place",
+    "label": "Place 4",
+    "ui_group": "main",
     "number": 4,
-    "supported": true
+    "requires_number": [4],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "place_5",
-    "engine_code": "place",
-    "friendly_name": "Place 5",
     "family": "place",
+    "engine_verb": "place",
+    "label": "Place 5",
+    "ui_group": "main",
     "number": 5,
-    "supported": true
+    "requires_number": [5],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "place_6",
-    "engine_code": "place",
-    "friendly_name": "Place 6",
     "family": "place",
+    "engine_verb": "place",
+    "label": "Place 6",
+    "ui_group": "main",
     "number": 6,
-    "supported": true
+    "requires_number": [6],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "place_8",
-    "engine_code": "place",
-    "friendly_name": "Place 8",
     "family": "place",
+    "engine_verb": "place",
+    "label": "Place 8",
+    "ui_group": "main",
     "number": 8,
-    "supported": true
+    "requires_number": [8],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "place_9",
-    "engine_code": "place",
-    "friendly_name": "Place 9",
     "family": "place",
+    "engine_verb": "place",
+    "label": "Place 9",
+    "ui_group": "main",
     "number": 9,
-    "supported": true
+    "requires_number": [9],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "place_10",
-    "engine_code": "place",
-    "friendly_name": "Place 10",
     "family": "place",
+    "engine_verb": "place",
+    "label": "Place 10",
+    "ui_group": "main",
     "number": 10,
-    "supported": true
+    "requires_number": [10],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "lay_4",
-    "engine_code": "lay",
-    "friendly_name": "Lay 4",
     "family": "lay",
+    "engine_verb": "lay",
+    "label": "Lay 4",
+    "ui_group": "main",
     "number": 4,
-    "supported": true
+    "requires_number": [4],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "lay_5",
-    "engine_code": "lay",
-    "friendly_name": "Lay 5",
     "family": "lay",
+    "engine_verb": "lay",
+    "label": "Lay 5",
+    "ui_group": "main",
     "number": 5,
-    "supported": true
+    "requires_number": [5],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "lay_6",
-    "engine_code": "lay",
-    "friendly_name": "Lay 6",
     "family": "lay",
+    "engine_verb": "lay",
+    "label": "Lay 6",
+    "ui_group": "main",
     "number": 6,
-    "supported": true
+    "requires_number": [6],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "lay_8",
-    "engine_code": "lay",
-    "friendly_name": "Lay 8",
     "family": "lay",
+    "engine_verb": "lay",
+    "label": "Lay 8",
+    "ui_group": "main",
     "number": 8,
-    "supported": true
+    "requires_number": [8],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "lay_9",
-    "engine_code": "lay",
-    "friendly_name": "Lay 9",
     "family": "lay",
+    "engine_verb": "lay",
+    "label": "Lay 9",
+    "ui_group": "main",
     "number": 9,
-    "supported": true
+    "requires_number": [9],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "lay_10",
-    "engine_code": "lay",
-    "friendly_name": "Lay 10",
     "family": "lay",
+    "engine_verb": "lay",
+    "label": "Lay 10",
+    "ui_group": "main",
     "number": 10,
-    "supported": true
+    "requires_number": [10],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "hardway_4",
-    "engine_code": "hardway",
-    "friendly_name": "Hardway 4",
     "family": "hardway",
+    "engine_verb": "hardway",
+    "label": "Hardway 4",
+    "ui_group": "prop",
     "number": 4,
-    "supported": true
+    "requires_number": [4],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "hardway_6",
-    "engine_code": "hardway",
-    "friendly_name": "Hardway 6",
     "family": "hardway",
+    "engine_verb": "hardway",
+    "label": "Hardway 6",
+    "ui_group": "prop",
     "number": 6,
-    "supported": true
+    "requires_number": [6],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "hardway_8",
-    "engine_code": "hardway",
-    "friendly_name": "Hardway 8",
     "family": "hardway",
+    "engine_verb": "hardway",
+    "label": "Hardway 8",
+    "ui_group": "prop",
     "number": 8,
-    "supported": true
+    "requires_number": [8],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   },
   {
     "key": "hardway_10",
-    "engine_code": "hardway",
-    "friendly_name": "Hardway 10",
     "family": "hardway",
+    "engine_verb": "hardway",
+    "label": "Hardway 10",
+    "ui_group": "prop",
     "number": 10,
-    "supported": true
-  },
-  {
-    "key": "odds_pass_line",
-    "engine_code": "pass_odds",
-    "friendly_name": "Pass Line Odds",
-    "family": "odds",
-    "dynamic_point": true,
-    "supported": false,
-    "notes": "Listed for UI parity; not exported to CrapsSim in Phase 1."
-  },
-  {
-    "key": "odds_dont_pass",
-    "engine_code": "dont_pass_odds",
-    "friendly_name": "Don't Pass Odds",
-    "family": "odds",
-    "dynamic_point": true,
-    "supported": false,
-    "notes": "Listed for UI parity; not exported to CrapsSim in Phase 1."
-  },
-  {
-    "key": "odds_come",
-    "engine_code": "come_odds",
-    "friendly_name": "Come Odds",
-    "family": "odds",
-    "dynamic_point": true,
-    "supported": false,
-    "notes": "Listed for UI parity; not exported to CrapsSim in Phase 1."
-  },
-  {
-    "key": "odds_dont_come",
-    "engine_code": "dont_come_odds",
-    "friendly_name": "Don't Come Odds",
-    "family": "odds",
-    "dynamic_point": true,
-    "supported": false,
-    "notes": "Listed for UI parity; not exported to CrapsSim in Phase 1."
-  },
-  {
-    "key": "prop_any7",
-    "engine_code": "any7",
-    "friendly_name": "Any 7",
-    "family": "prop",
-    "supported": false,
-    "notes": "Exposed in UI but not exported in Phase 1."
-  },
-  {
-    "key": "prop_any_craps",
-    "engine_code": "any_craps",
-    "friendly_name": "Any Craps",
-    "family": "prop",
-    "supported": false,
-    "notes": "Exposed in UI but not exported in Phase 1."
-  },
-  {
-    "key": "prop_yo11",
-    "engine_code": "yo11",
-    "friendly_name": "Yo 11",
-    "family": "prop",
-    "supported": false,
-    "notes": "Exposed in UI but not exported in Phase 1."
-  },
-  {
-    "key": "prop_aces",
-    "engine_code": "aces",
-    "friendly_name": "Aces",
-    "family": "prop",
-    "supported": false,
-    "notes": "Exposed in UI but not exported in Phase 1."
-  },
-  {
-    "key": "prop_boxcars",
-    "engine_code": "boxcars",
-    "friendly_name": "Boxcars",
-    "family": "prop",
-    "supported": false,
-    "notes": "Exposed in UI but not exported in Phase 1."
-  },
-  {
-    "key": "prop_ace_deuce",
-    "engine_code": "ace_deuce",
-    "friendly_name": "Ace-Deuce",
-    "family": "prop",
-    "supported": false,
-    "notes": "Exposed in UI but not exported in Phase 1."
-  },
-  {
-    "key": "prop_horn",
-    "engine_code": "horn",
-    "friendly_name": "Horn",
-    "family": "prop",
-    "supported": false,
-    "notes": "Exposed in UI but not exported in Phase 1."
-  },
-  {
-    "key": "prop_horn_high",
-    "engine_code": "horn_high",
-    "friendly_name": "Horn High",
-    "family": "prop",
-    "supported": false,
-    "notes": "Exposed in UI but not exported in Phase 1."
-  },
-  {
-    "key": "prop_hop_generic",
-    "engine_code": "hop",
-    "friendly_name": "Hop (generic)",
-    "family": "prop",
-    "supported": false,
-    "notes": "Placeholder for hop combinations; not exported in Phase 1."
-  },
-  {
-    "key": "prop_other",
-    "engine_code": "prop_other",
-    "friendly_name": "Prop (other)",
-    "family": "prop",
-    "supported": false,
-    "notes": "Catch-all for custom props; not exported in Phase 1."
+    "requires_number": [10],
+    "args_schema": { "required": ["amount", "number"], "optional": [] }
   }
 ]

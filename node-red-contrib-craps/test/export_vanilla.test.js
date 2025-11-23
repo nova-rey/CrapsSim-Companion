@@ -31,17 +31,6 @@ assert(py.includes("BetPlace"), "Python output should include BetPlace");
 
 console.log("export-vanilla strategy_config path passed");
 
-const unsupportedConfig = {
-    strategy_name: "UnsupportedExample",
-    table: vt,
-    bets: [
-        { key: "prop_any7", base_amount: 5, unit_type: "units" }
-    ]
-};
-
-const { errors: unsupportedErrors } = helpers.buildCompFromStrategyConfig(unsupportedConfig, vt, () => {});
-assert(Array.isArray(unsupportedErrors) && unsupportedErrors.length === 0, "Unsupported bets should not cause errors");
-
 // Regression: legacy recipe.steps path should map to the same comp as strategy_config
 const recipeSteps = [
     { type: "pass_line", amount: 10, unitType: "units" },

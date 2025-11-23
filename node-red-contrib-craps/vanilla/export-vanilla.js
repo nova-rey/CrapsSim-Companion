@@ -1,10 +1,7 @@
-const {
-    getVarTable,
-    dollarsFromUnitsOrLiteral,
-    legalizeBetByType
-} = require("./legalizer.js");
-const { getBetDefinition, isSupported, allowedNumbers } = require("../lib/bet_surface");
+const { getVarTable } = require("./legalizer.js");
+const { getBetDefinition, allowedNumbers } = require("../lib/bet_surface");
 const { normalizeStrategyName } = require("../lib/strategy_compiler");
+const { mapBetToVanillaSpec } = require("../lib/bet_mapping");
 
 function clone(x) { return JSON.parse(JSON.stringify(x)); }
 
@@ -28,8 +25,6 @@ function canonicalizeBet(kind, number) {
         case "place": return allowed ? { def: getBetDefinition(`place_${num}`), number: num } : { def: null, number: num };
         case "lay": return allowed ? { def: getBetDefinition(`lay_${num}`), number: num } : { def: null, number: num };
         case "hardway": return [4, 6, 8, 10].includes(Number(num)) ? { def: getBetDefinition(`hardway_${num}`), number:num } : { def: null, number: num };
-        case "prop": return { def: getBetDefinition("prop_other"), number: num };
-        case "odds": return { def: getBetDefinition("odds_pass_line"), number: num };
         default: return { def: null, number: num };
     }
 }
@@ -84,28 +79,28 @@ function currentBucket(comp, phase) {
     return comp[phase || "maingame"];
 }
 
-function addToBucket(comp, phase, def, num, legalized) {
+function addToBucket(comp, phase, spec) {
     const bkt = currentBucket(comp, phase);
-    switch (def.family) {
+    switch (spec.family) {
         case "line":
-            bkt.line.push({ key: def.key, amount: legalized });
+            bkt.line.push({ key: spec.key, amount: spec.dollars });
             break;
         case "place":
-            if ([4,5,6,8,9,10].includes(num)) {
-                bkt.place[num] = (bkt.place[num] || 0) + legalized;
+            if ([4,5,6,8,9,10].includes(spec.number)) {
+                bkt.place[spec.number] = (bkt.place[spec.number] || 0) + spec.dollars;
             }
             break;
         case "lay":
-            if ([4,5,6,8,9,10].includes(num)) {
-                bkt.lay[num] = (bkt.lay[num] || 0) + legalized;
+            if ([4,5,6,8,9,10].includes(spec.number)) {
+                bkt.lay[spec.number] = (bkt.lay[spec.number] || 0) + spec.dollars;
             }
             break;
         case "field":
-            bkt.field.push({ amount: legalized });
+            bkt.field.push({ amount: spec.dollars });
             break;
         case "hardway":
-            if ([4,6,8,10].includes(num)) {
-                bkt.hard.push({ number: num, amount: legalized });
+            if ([4,6,8,10].includes(spec.number)) {
+                bkt.hard.push({ number: spec.number, amount: spec.dollars });
             }
             break;
         default:
@@ -114,6 +109,37 @@ function addToBucket(comp, phase, def, num, legalized) {
 }
 
 function hasAny(obj) { return obj && Object.keys(obj).length > 0; }
+
+function buildBetEntryFromStep(step, def, resolvedNumber) {
+    const value = step.amount;
+    let base_amount;
+    let unit_type;
+
+    if (typeof value === "object" && value !== null && ("units" in value || "dollars" in value)) {
+        if (value.dollars !== undefined) {
+            unit_type = "dollars";
+            base_amount = Number(value.dollars);
+        } else if (value.units !== undefined) {
+            unit_type = "units";
+            base_amount = Number(value.units);
+        }
+    }
+
+    if (base_amount === undefined) {
+        unit_type = step.unitType || "dollars";
+        base_amount = Number(value);
+    }
+
+    if (!(base_amount > 0)) return null;
+
+    return {
+        key: def.key,
+        base_amount,
+        unit_type,
+        number: resolvedNumber ?? def.number,
+        phase: step.phase
+    };
+}
 
 function buildCompFromSteps(steps, vt, warn) {
     const comp = createEmptyComp();
@@ -144,24 +170,15 @@ function buildCompFromSteps(steps, vt, warn) {
             continue;
         }
 
-        const value = s.amount;
-        let preDollars;
-        if (typeof value === "object" && value !== null && ("units" in value || "dollars" in value)) {
-            preDollars = dollarsFromUnitsOrLiteral(value, vt);
-        } else if (s.unitType === "units") {
-            preDollars = dollarsFromUnitsOrLiteral({ units: Number(value) }, vt);
-        } else {
-            preDollars = Number(value);
+        const betEntry = buildBetEntryFromStep(s, def, num);
+        if (!betEntry) continue;
+
+        try {
+            const spec = mapBetToVanillaSpec(betEntry, def, { varTable: vt });
+            addToBucket(comp, phase, spec);
+        } catch (err) {
+            warn && warn(`export: skipping bet '${def.key}': ${err.message}`);
         }
-        if (!(preDollars > 0)) continue;
-
-        const legalized = legalizeBetByType({ type: def.key, point: num }, preDollars, undefined, vt);
-
-        if (!isSupported(def.key)) {
-            warn && warn(`export: bet type '${def.key}' is currently unsupported and may be ignored by the engine.`);
-        }
-
-        addToBucket(comp, phase, def, num, legalized);
     }
 
     return { comp };
@@ -183,34 +200,17 @@ function buildCompFromStrategyConfig(strategyConfig, vt, warn) {
             continue;
         }
 
-        const unitType = bet.unit_type;
-        const baseAmount = Number(bet.base_amount);
-        if (!(baseAmount > 0) || !["units", "dollars"].includes(unitType)) {
-            errors.push(`export: bet '${bet.key}' requires positive base_amount and unit_type`);
-            continue;
+        try {
+            const spec = mapBetToVanillaSpec({
+                key: bet.key,
+                base_amount: bet.base_amount,
+                unit_type: bet.unit_type,
+                number: bet.number
+            }, def, { varTable: vt });
+            addToBucket(comp, bet.phase, spec);
+        } catch (err) {
+            errors.push(`export: bet '${bet.key}' invalid - ${err.message}`);
         }
-
-        const num = bet.number != null ? Number(bet.number) : def.number;
-        if (["place", "lay", "hardway", "odds"].includes(def.family) && def.dynamic_point !== true) {
-            if (!allowedNumbers.has(Number(num))) {
-                warn && warn(`export: skipping ${def.key} with invalid point ${String(num)}`);
-                continue;
-            }
-        }
-
-        const preDollars = dollarsFromUnitsOrLiteral(unitType === "units" ? { units: baseAmount } : { dollars: baseAmount }, vt);
-        if (!(preDollars > 0)) {
-            warn && warn(`export: bet '${bet.key}' resolved to zero dollars after scaling`);
-            continue;
-        }
-
-        const legalized = legalizeBetByType({ type: def.key, point: num }, preDollars, undefined, vt);
-
-        if (!isSupported(def.key)) {
-            warn && warn(`export: bet type '${def.key}' is currently unsupported and may be ignored by the engine.`);
-        }
-
-        addToBucket(comp, bet.phase, def, num, legalized);
     }
 
     return { comp, errors };

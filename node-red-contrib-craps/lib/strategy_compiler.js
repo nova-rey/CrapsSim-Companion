@@ -2,6 +2,10 @@ const { getBetDefinition, isSupported, allowedNumbers } = require("./bet_surface
 const { getVarTable } = require("../vanilla/legalizer");
 const pkg = require("../package.json");
 
+function requiresNumber(def) {
+    return !!def && !!def.requires_number;
+}
+
 function normalizeStrategyName(name, fallback = "MyStrategy") {
     const raw = (name || fallback || "MyStrategy").toString();
     return raw.replace(/[^A-Za-z0-9_]/g, "_");
@@ -59,7 +63,7 @@ function compileStrategyConfig({
         }
 
         const number = step.number ?? step.point ?? def.number;
-        if (["place", "lay", "hardway", "odds"].includes(def.family) && def.dynamic_point !== true) {
+        if (requiresNumber(def)) {
             if (!allowedNumbers.has(Number(number))) {
                 errs.push(`Bet '${type}' requires a valid point number (4,5,6,8,9,10)`);
                 continue;

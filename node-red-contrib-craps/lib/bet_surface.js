@@ -1,8 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const allowedFamilies = new Set(["line", "place", "lay", "field", "hardway", "prop", "odds", "meta"]);
-const numberRequiredFamilies = new Set(["place", "lay", "hardway", "odds"]);
+const allowedFamilies = new Set(["line", "place", "lay", "field", "hardway"]);
 const allowedNumbers = new Set([4, 5, 6, 8, 9, 10]);
 
 let catalogCache = null;
@@ -16,6 +15,42 @@ function loadCatalog() {
     return catalogCache;
 }
 
+function validateArgsSchema(args_schema, ctx) {
+    if (!args_schema || typeof args_schema !== "object") {
+        throw new Error(`${ctx}: args_schema must be an object`);
+    }
+    const required = Array.isArray(args_schema.required) ? args_schema.required : [];
+    const optional = Array.isArray(args_schema.optional) ? args_schema.optional : [];
+    return { required, optional };
+}
+
+function validateRequiresNumber(entry, ctx) {
+    const { requires_number, number } = entry;
+    if (requires_number === undefined) return { requires_number: false, number };
+    if (requires_number === false) return { requires_number: false, number };
+    if (requires_number === true) {
+        if (number === undefined || number === null) {
+            throw new Error(`${ctx}: requires_number=true requires a number field`);
+        }
+        if (!allowedNumbers.has(Number(number))) {
+            throw new Error(`${ctx}: number '${number}' is not allowed`);
+        }
+        return { requires_number: true, number: Number(number) };
+    }
+    if (Array.isArray(requires_number)) {
+        const normalized = requires_number.map(n => Number(n));
+        const invalid = normalized.find(n => !allowedNumbers.has(n));
+        if (invalid !== undefined) {
+            throw new Error(`${ctx}: requires_number includes invalid number '${invalid}'`);
+        }
+        if (number !== undefined && !normalized.includes(Number(number))) {
+            throw new Error(`${ctx}: number '${number}' not permitted by requires_number`);
+        }
+        return { requires_number: normalized, number: number !== undefined ? Number(number) : number };
+    }
+    throw new Error(`${ctx}: requires_number must be boolean or array`);
+}
+
 function validateAndNormalize(entries) {
     if (!Array.isArray(entries)) {
         throw new Error("bet_surface.json must be an array of bet definitions");
@@ -26,9 +61,9 @@ function validateAndNormalize(entries) {
         if (!entry || typeof entry !== "object") {
             throw new Error(`${ctx}: entry must be an object`);
         }
-        const { key, engine_code, friendly_name, family, number, min_unit, increment, dynamic_point } = entry;
-        if (!key || !engine_code || !friendly_name || !family) {
-            throw new Error(`${ctx}: missing required field (key, engine_code, friendly_name, family)`);
+        const { key, family, engine_verb, label, ui_group } = entry;
+        if (!key || !family || !engine_verb || !label || !ui_group) {
+            throw new Error(`${ctx}: missing required field (key, family, engine_verb, label, ui_group)`);
         }
         if (seen.has(key)) {
             throw new Error(`${ctx}: duplicate key '${key}'`);
@@ -37,22 +72,24 @@ function validateAndNormalize(entries) {
         if (!allowedFamilies.has(family)) {
             throw new Error(`${ctx}: unknown family '${family}'`);
         }
-        if (numberRequiredFamilies.has(family)) {
-            const hasNumber = number !== undefined && number !== null;
-            if (!hasNumber && !dynamic_point) {
-                throw new Error(`${ctx}: family '${family}' requires number in {4,5,6,8,9,10}`);
-            }
-            if (hasNumber && !allowedNumbers.has(Number(number))) {
-                throw new Error(`${ctx}: invalid number '${number}' for family '${family}'`);
-            }
+
+        const args_schema = validateArgsSchema(entry.args_schema, ctx);
+        const { requires_number, number } = validateRequiresNumber(entry, ctx);
+        if (number !== undefined && number !== null && !allowedNumbers.has(Number(number))) {
+            throw new Error(`${ctx}: invalid number '${number}'`);
         }
-        if (min_unit !== undefined && (!Number.isInteger(min_unit) || min_unit <= 0)) {
-            throw new Error(`${ctx}: min_unit must be a positive integer`);
-        }
-        if (increment !== undefined && (!Number.isInteger(increment) || increment <= 0)) {
-            throw new Error(`${ctx}: increment must be a positive integer`);
-        }
-        return { ...entry, key: String(key), engine_code: String(engine_code), friendly_name: String(friendly_name), family };
+
+        return {
+            ...entry,
+            key: String(key),
+            engine_verb: String(engine_verb),
+            label: String(label),
+            family,
+            ui_group,
+            args_schema,
+            requires_number,
+            number: number !== undefined ? Number(number) : undefined
+        };
     });
 }
 
@@ -62,12 +99,11 @@ function getBetDefinition(key) {
 }
 
 function isSupported(key) {
-    const def = getBetDefinition(key);
-    return !!def && def.supported !== false;
+    return !!getBetDefinition(key);
 }
 
 function listSupported() {
-    return loadCatalog().filter(b => b.supported !== false);
+    return loadCatalog();
 }
 
 function listByFamily(family) {
