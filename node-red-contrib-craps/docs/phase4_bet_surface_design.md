@@ -26,7 +26,7 @@ Only Pass/Don't Pass, Come/Don't Come, Field, Place/Lay on 4/5/6/8/9/10, and Har
 
 ## Mapping helper
 
-`lib/bet_mapping.js` converts `strategy_config.bets[]` entries into either:
+`lib/bet_mapping.js` converts `strategy_config.bets[]` entries into either (and remains available for Phase 7 legacy fallbacks when `actions[]` is absent):
 
 - `{ verb, args }` payloads for the CrapsSim Engine API, or
 - `{ className, args, dollars }` specs for the vanilla exporter.

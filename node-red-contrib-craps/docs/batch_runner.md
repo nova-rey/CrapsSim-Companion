@@ -3,7 +3,7 @@
 The **Run: Batch Simulation** node executes a compiled `strategy_config` across multiple seeds using the CrapsSim Engine HTTP API and aggregates the results.
 
 ## Inputs
-- `msg.strategy_config` (required) from the Strategy Compiler.
+- `msg.strategy_config` (required) from the Strategy Compiler. If `actions[]` is present it will be executed directly; `bets[]` is still accepted for legacy flows.
 - Seed configuration (choose one):
   - `msg.seeds = [seed1, seed2, ...]`, or
   - `msg.seed_start` + `msg.seed_count` (contiguous range) when `msg.seeds` is empty.

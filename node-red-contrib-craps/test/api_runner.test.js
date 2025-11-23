@@ -115,6 +115,53 @@ async function testActionsPreferred() {
     console.log("api-runner actions path passed");
 }
 
+async function testActionsPreferredOverBets() {
+    const node = createNodeStub();
+    const apiConfig = { base_url: "http://127.0.0.1:8000", profile_id: "default" };
+    const msg = {
+        strategy_config: {
+            strategy_name: "Both",
+            table: {
+                mode: "bubble",
+                multiplier: 1,
+                bubble: true,
+                rules: { flatIncrement: 1, placeIncrements: {}, layIncrement: 1, propIncrement: 1, oddsPolicy: { enabled: false, maxMultiple: {} } }
+            },
+            actions: [
+                { verb: "pass_line", args: { amount: 5 }, meta: { unit_type: "dollars" } }
+            ],
+            bets: [
+                { key: "pass_line", base_amount: 25, unit_type: "dollars" },
+                { key: "place_6", base_amount: 12, unit_type: "dollars", number: 6 }
+            ]
+        }
+    };
+
+    const expected = [{ verb: "pass_line", amount: 5 }];
+
+    nock(apiConfig.base_url).post("/session/start").reply(200, { session_id: "abc", bankroll: 300 });
+    nock(apiConfig.base_url).post("/session/apply_action", body => {
+        const next = expected.shift();
+        assert.strictEqual(body.verb, next.verb);
+        assert.strictEqual(body.args.amount, next.amount);
+        return true;
+    }).once().reply(200, {});
+    nock(apiConfig.base_url).post("/session/roll").reply(200, { bankroll: 305 });
+    nock(apiConfig.base_url).post("/end_session").reply(200, {});
+
+    const out = await runSimulation({
+        msg,
+        nodeConfig: { rolls: 1, strict_mode: false, prepare_file_output: false },
+        apiConfigNode: apiConfig,
+        node,
+        httpClient: require("axios")
+    });
+
+    assert.strictEqual(expected.length, 0, "Only actions should be applied when provided");
+    assert.strictEqual(out.sim_result.rolls, 1);
+    console.log("api-runner actions preferred over bets passed");
+}
+
 async function testAggregatedErrors() {
     const node = createNodeStub();
     const apiConfig = { base_url: "http://127.0.0.1:8000", default_seed_mode: "random" };
@@ -299,6 +346,8 @@ async function testHttpFailure() {
         await testHappyPath();
         nock.cleanAll();
         await testActionsPreferred();
+        nock.cleanAll();
+        await testActionsPreferredOverBets();
         nock.cleanAll();
         await testAggregatedErrors();
         nock.cleanAll();
