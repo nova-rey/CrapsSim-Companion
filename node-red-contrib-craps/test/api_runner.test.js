@@ -27,6 +27,19 @@ function defaultMsg() {
     };
 }
 
+function actionMsg() {
+    return {
+        strategy_config: {
+            strategy_name: "ActionStrat",
+            table: null,
+            actions: [
+                { verb: "pass_line", args: { amount: 10 }, meta: { unit_type: "units" } },
+                { verb: "place", args: { amount: 30, number: 6 }, meta: { unit_type: "dollars" } }
+            ]
+        }
+    };
+}
+
 async function testHappyPath() {
     const node = createNodeStub();
     const apiConfig = { base_url: "http://127.0.0.1:8000", profile_id: "default", default_seed_mode: "fixed", seed: 42 };
@@ -72,6 +85,34 @@ async function testHappyPath() {
     assert(out.filename && out.filename.endsWith("journal.ndjson"));
 
     console.log("api-runner happy path passed");
+}
+
+async function testActionsPreferred() {
+    const node = createNodeStub();
+    const apiConfig = { base_url: "http://127.0.0.1:8000", profile_id: "default" };
+    const msg = actionMsg();
+
+    nock(apiConfig.base_url).post("/session/start").reply(200, { session_id: "abc", bankroll: 300 });
+    const expectedVerbs = ["pass_line", "place"];
+    nock(apiConfig.base_url).post("/session/apply_action", body => {
+        const next = expectedVerbs.shift();
+        assert.strictEqual(body.verb, next);
+        return true;
+    }).twice().reply(200, {});
+    nock(apiConfig.base_url).post("/session/roll").reply(200, { bankroll: 320 });
+    nock(apiConfig.base_url).post("/end_session").reply(200, {});
+
+    const out = await runSimulation({
+        msg,
+        nodeConfig: { rolls: 1, strict_mode: false, prepare_file_output: false },
+        apiConfigNode: apiConfig,
+        node,
+        httpClient: require("axios")
+    });
+
+    assert.strictEqual(expectedVerbs.length, 0, "All actions should be applied");
+    assert.strictEqual(out.sim_result.rolls, 1);
+    console.log("api-runner actions path passed");
 }
 
 async function testAggregatedErrors() {
@@ -256,6 +297,8 @@ async function testHttpFailure() {
 (async () => {
     try {
         await testHappyPath();
+        nock.cleanAll();
+        await testActionsPreferred();
         nock.cleanAll();
         await testAggregatedErrors();
         nock.cleanAll();

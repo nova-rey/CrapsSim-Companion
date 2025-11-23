@@ -38,7 +38,7 @@
     }
   },
   "scripts": {
-    "test": "node test/bet_surface_spec.js && node test/bet_mapping_spec.js && node test/bet_surface.test.js && node test/strategy_compiler.test.js && node test/export_vanilla.test.js && node test/api_runner.test.js && node test/batch_runner_spec.js"
+    "test": "node test/bet_surface_spec.js && node test/bet_mapping_spec.js && node test/bet_surface.test.js && node test/strategy_compiler.test.js && node test/export_vanilla.test.js && node test/api_runner.test.js && node test/batch_runner_spec.js && node test/test_verb_registry.js"
   },
   "dependencies": {
     "axios": "^1.7.7",

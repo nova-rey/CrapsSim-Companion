@@ -30,4 +30,25 @@ const place8 = config.bets.find(b => b.key === "place_8");
 assert(place8 && place8.number === 8, "place_8 should include number 8");
 assert.strictEqual(place8.unit_type, "units");
 
+assert(Array.isArray(config.actions) && config.actions.length === 3, "actions should mirror bets");
+assert(config.actions.some(a => a.verb === "pass_line"), "actions should include pass_line verb");
+const placeAction = config.actions.find(a => a.verb === "place" && a.args.number === 6);
+assert(placeAction && placeAction.args.amount === 18, "place action should include normalized amount");
+
+let threwInvalid = false;
+const registry = require("../lib/verb_registry").loadVerbRegistry();
+const placeEntry = registry.get("place");
+try {
+    registry.delete("place");
+    const { errors: badErrors } = compileStrategyConfig({
+        steps: [{ type: "place_6", amount: 10, unitType: "dollars", number: 6 }],
+        strategyName: "Bad",
+        table: vt
+    });
+    threwInvalid = Array.isArray(badErrors) && badErrors.some(e => e.includes("Invalid action"));
+} finally {
+    registry.set("place", placeEntry);
+}
+assert(threwInvalid, "compiler should surface invalid verbs/actions");
+
 console.log("strategy_compiler basic assembly passed");
