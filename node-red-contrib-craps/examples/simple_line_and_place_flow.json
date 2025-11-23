@@ -1,0 +1,118 @@
+[
+  {
+    "id": "af35e6b6f4b3e9c1",
+    "type": "tab",
+    "label": "Simple Line and Place",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "a27d2a5b8a5d4b91",
+    "type": "comment",
+    "z": "af35e6b6f4b3e9c1",
+    "name": "Pass Line with Place 6/8",
+    "info": "Demonstrates canonical bet keys from bet_surface: pass_line, place_6, place_8. Uses bet-type nodes with fixed amounts and emits msg.recipe.steps for inspection.",
+    "x": 240,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "d5b78232c3a6f358",
+    "type": "inject",
+    "z": "af35e6b6f4b3e9c1",
+    "name": "trigger once",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "str",
+    "x": 140,
+    "y": 120,
+    "wires": [
+      [
+        "a8e4e4a3f794cb0f"
+      ]
+    ]
+  },
+  {
+    "id": "a8e4e4a3f794cb0f",
+    "type": "bet-type",
+    "z": "af35e6b6f4b3e9c1",
+    "kind": "Pass",
+    "number": "",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "10",
+    "unitType": "units",
+    "note": "",
+    "x": 360,
+    "y": 120,
+    "wires": [
+      [
+        "e40c1bd8b90e3c46"
+      ]
+    ]
+  },
+  {
+    "id": "e40c1bd8b90e3c46",
+    "type": "bet-type",
+    "z": "af35e6b6f4b3e9c1",
+    "kind": "Place",
+    "number": "6",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "12",
+    "unitType": "units",
+    "note": "",
+    "x": 580,
+    "y": 120,
+    "wires": [
+      [
+        "a0c9a8b5bf2c9d94"
+      ]
+    ]
+  },
+  {
+    "id": "a0c9a8b5bf2c9d94",
+    "type": "bet-type",
+    "z": "af35e6b6f4b3e9c1",
+    "kind": "Place",
+    "number": "8",
+    "betId": "",
+    "valueSource": "fixed",
+    "amount": "12",
+    "unitType": "units",
+    "note": "",
+    "x": 800,
+    "y": 120,
+    "wires": [
+      [
+        "97be96c7e1c3cdf0"
+      ]
+    ]
+  },
+  {
+    "id": "97be96c7e1c3cdf0",
+    "type": "debug",
+    "z": "af35e6b6f4b3e9c1",
+    "name": "recipe steps",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "recipe.steps",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1020,
+    "y": 120,
+    "wires": []
+  }
+]
