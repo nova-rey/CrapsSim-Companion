@@ -6,6 +6,10 @@ These nodes let you build strategies visually as a “recipe flow,” validate t
 
 No coding required—just drag, drop, and connect blocks.
 
+📚 Bet Surface Catalog
+
+The pack now ships with a canonical bet catalog (`bet_surface.json`) that all bet nodes share. Each bet emits a canonical key that maps to CrapsSim’s engine identifiers. Phase 1 supports line bets (pass_line, dont_pass, come, dont_come), field, place and lay numbers (4/5/6/8/9/10), and hardways (4/6/8/10). Odds and non-hardway prop bets are listed in the catalog for UI parity but are marked unsupported and will warn during validation/export.
+
 📦 Nodes
 🎲 Bet Construction
 

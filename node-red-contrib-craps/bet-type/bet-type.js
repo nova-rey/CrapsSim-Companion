@@ -1,4 +1,30 @@
+const { getBetDefinition, isSupported, allowedNumbers } = require("../lib/bet_surface");
+
 module.exports = function(RED) {
+    function resolveCanonical(kind, number) {
+        const k = String(kind || "").toLowerCase();
+        const n = Number(number);
+        const hasPoint = allowedNumbers.has(n);
+        switch (k) {
+            case "pass": return "pass_line";
+            case "dontpass":
+            case "don'tpass":
+            case "dont_pass": return "dont_pass";
+            case "come": return "come";
+            case "dontcome":
+            case "don'tcome":
+            case "dont_come": return "dont_come";
+            case "field": return "field";
+            case "place": return hasPoint ? `place_${n}` : null;
+            case "lay": return hasPoint ? `lay_${n}` : null;
+            case "passodds": return "odds_pass_line";
+            case "dontpassodds": return "odds_dont_pass";
+            case "comeodds": return "odds_come";
+            case "dontcomeodds": return "odds_dont_come";
+            default: return null;
+        }
+    }
+
     function BetTypeNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
@@ -24,7 +50,7 @@ module.exports = function(RED) {
         node.on("input", function(msg, send, done) {
             try {
                 const kind   = config.kind || "Pass";
-                const number = (config.number !== "" && config.number !== null) ? Number(config.number) : undefined;
+                const numberRaw = (config.number !== "" && config.number !== null) ? Number(config.number) : undefined;
                 const betId  = (config.betId || "").trim();
                 const note   = (config.note || "").trim();
 
@@ -39,14 +65,32 @@ module.exports = function(RED) {
                     unitType = fed.unitType || "units";
                 }
 
+                const canonical = resolveCanonical(kind, numberRaw);
+                if (!canonical) { node.error(`bet-type: unknown bet kind '${kind}' or missing number`); return done(); }
+                const def = getBetDefinition(canonical);
+                if (!def) { node.error(`bet-type: bet type '${canonical}' not found in catalog`); return done(); }
+
+                const number = Number.isFinite(numberRaw) ? numberRaw : (def.number !== undefined ? def.number : undefined);
+                if (def.family && ["place", "lay", "hardway", "odds"].includes(def.family) && def.dynamic_point !== true) {
+                    if (!allowedNumbers.has(Number(number))) {
+                        node.error(`bet-type: number required for ${def.family} bet '${canonical}'`);
+                        return done();
+                    }
+                }
+
+                if (!isSupported(canonical)) {
+                    node.warn(`Bet type '${canonical}' is currently unsupported and may be ignored by the exporter.`);
+                }
+
                 msg.recipe = msg.recipe || { steps: [] };
-                const step = { type: kind, amount, unitType };
-                if (number !== undefined && !Number.isNaN(number)) step.number = number;
+                const step = { type: canonical, amount, unitType };
+                if (number !== undefined && !Number.isNaN(number)) step.number = Number(number);
                 if (betId) step.betId = betId;
                 if (note)  step.note  = note;
 
                 msg.recipe.steps.push(step);
-                node.status({fill:"green", shape:"dot", text:`${kind}${step.number? " "+step.number:""}: ${amount} ${unitType}`});
+                const label = def.friendly_name || canonical;
+                node.status({fill:"green", shape:"dot", text:`${label}${step.number? " "+step.number:""}: ${amount} ${unitType}`});
                 send(msg); done();
             } catch (err) { done(err); }
         });

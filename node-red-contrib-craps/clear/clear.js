@@ -1,60 +1,90 @@
-module.exports = function(RED) {
-    function normalizeType(t) {
-        const s = String(t || "").toLowerCase().replace(/\s+/g, "_");
-        if (s === "pass" || s === "betpassline" || s === "bet_pass" || s === "passline") return "pass";
-        if (s === "dontpass" || s === "dont_pass" || s === "don't_pass" || s === "betdontpass") return "dont_pass";
-        if (s === "come" || s === "betcome") return "come";
-        if (s === "dontcome" || s === "dont_come" || s === "don't_come" || s === "betdontcome") return "dont_come";
-        if (s === "field" || s === "betfield") return "field";
-        if (s === "place" || s === "betplace") return "place";
-        if (s === "lay" || s === "betlay") return "lay";
-        if (s === "hardway" || s === "hard" || s === "bethardway") return "hardway";
-        if (s === "prop" || s === "proposition") return "prop";
-        if (s === "odds") return "odds";
-        return s || "";
-    }
+const { getBetDefinition, allowedNumbers } = require("../lib/bet_surface");
 
+module.exports = function(RED) {
     function asInt(n) {
         const v = Number(n);
         return Number.isFinite(v) ? Math.round(v) : undefined;
     }
 
+    function normalizeLegacyType(t, point) {
+        const s = String(t || "").toLowerCase().replace(/\s+/g, "_");
+        const num = asInt(point);
+        if (s === "pass" || s === "betpassline" || s === "bet_pass" || s === "passline") return { key: "pass_line", number: num };
+        if (s === "dontpass" || s === "dont_pass" || s === "don't_pass" || s === "betdontpass") return { key: "dont_pass", number: num };
+        if (s === "come" || s === "betcome") return { key: "come", number: num };
+        if (s === "dontcome" || s === "dont_come" || s === "don't_come" || s === "betdontcome") return { key: "dont_come", number: num };
+        if (s === "field" || s === "betfield") return { key: "field", number: num };
+        if (s === "place" || s === "betplace") return allowedNumbers.has(num) ? { key: `place_${num}`, number: num } : { family: "place", number: num };
+        if (s === "lay" || s === "betlay") return allowedNumbers.has(num) ? { key: `lay_${num}`, number: num } : { family: "lay", number: num };
+        if (s === "hardway" || s === "hard" || s === "bethardway") return [4, 6, 8, 10].includes(num) ? { key: `hardway_${num}`, number: num } : { family: "hardway", number: num };
+        if (s === "prop" || s === "proposition") return { family: "prop", key: "prop_other", number: num };
+        if (s === "odds") return { family: "odds", key: "odds_pass_line", number: num };
+        return { key: null, number: num };
+    }
+
+    function expandTypes(typeTokens) {
+        const keySet = new Set();
+        const familySet = new Set();
+        for (const t of typeTokens) {
+            const raw = (t || "").toString();
+            const def = getBetDefinition(raw);
+            if (def) { keySet.add(def.key); continue; }
+            const norm = normalizeLegacyType(raw);
+            if (norm.key && getBetDefinition(norm.key)) { keySet.add(norm.key); continue; }
+            if (norm.family) { familySet.add(norm.family); continue; }
+            const s = raw.toLowerCase();
+            if (["place", "lay", "hardway", "prop", "odds", "line", "field"].includes(s)) familySet.add(s === "line" ? "line" : s);
+        }
+        return { keySet, familySet };
+    }
+
+    function canonicalizeBet(bet) {
+        if (!bet) return { key: null, def: null, number: undefined };
+        const number = asInt(bet.number != null ? bet.number : bet.point);
+        const direct = getBetDefinition(bet.type);
+        if (direct) {
+            const num = number !== undefined ? number : direct.number;
+            return { key: direct.key, def: direct, number: num };
+        }
+        const fallback = normalizeLegacyType(bet.type, number);
+        if (fallback.key) {
+            const def = getBetDefinition(fallback.key);
+            if (def) return { key: def.key, def, number: fallback.number !== undefined ? fallback.number : def.number };
+        }
+        return { key: null, def: null, number };
+    }
+
     function makePredicate(cfg, runtimeClear) {
-        // runtimeClear can override config: { all: true } or { types:[], points:[] }
         const mode = (runtimeClear && runtimeClear.all) ? "all" : (cfg.mode || "all");
 
         if (mode === "all") {
             return () => true; // remove everything
         }
 
-        // Merge selection from config + runtime
         const selTypesCfg = Array.isArray(cfg.types) ? cfg.types : (typeof cfg.types === "string" ? cfg.types.split(",") : []);
         const selPointsCfg = Array.isArray(cfg.points) ? cfg.points : (typeof cfg.points === "string" ? cfg.points.split(",") : []);
         const selTypesRun = Array.isArray(runtimeClear?.types) ? runtimeClear.types : [];
         const selPointsRun = Array.isArray(runtimeClear?.points) ? runtimeClear.points : [];
 
-        const typeSet = new Set([...selTypesCfg, ...selTypesRun].map(normalizeType).filter(Boolean));
-        const pointSet = new Set([...selPointsCfg, ...selPointsRun].map(asInt).filter(v => [4,5,6,8,9,10].includes(v)));
+        const typeTokens = [...selTypesCfg, ...selTypesRun].filter(Boolean);
+        const { keySet, familySet } = expandTypes(typeTokens);
 
-        const hasTypeFilter = typeSet.size > 0;
+        const pointSet = new Set([...selPointsCfg, ...selPointsRun].map(asInt).filter(v => allowedNumbers.has(v)));
+
+        const hasTypeFilter = keySet.size > 0 || familySet.size > 0;
         const hasPointFilter = pointSet.size > 0;
 
-        // If user picked "specific" but gave no filters, do nothing
         if (!hasTypeFilter && !hasPointFilter) {
             return () => false;
         }
 
         return (bet) => {
-            const bType = normalizeType(bet?.type);
-            const bPoint = asInt(bet?.point);
+            const { key, def, number } = canonicalizeBet(bet);
+            if (!key || !def) return false;
 
-            const typeMatch  = hasTypeFilter  ? typeSet.has(bType) : false;
-            const pointMatch = hasPointFilter ? pointSet.has(bPoint) : false;
+            const typeMatch = keySet.has(key) || familySet.has(def.family);
+            const pointMatch = hasPointFilter ? pointSet.has(asInt(number)) : false;
 
-            // Matching rules:
-            // - If both filters provided: remove when BOTH match (e.g., only Place on 6 & 8)
-            // - If only types provided:   remove when type matches
-            // - If only points provided:  remove any bet tied to that point (place/lay/hardway/odds on that point)
             if (hasTypeFilter && hasPointFilter) return typeMatch && pointMatch;
             if (hasTypeFilter) return typeMatch;
             return pointMatch;
@@ -73,14 +103,11 @@ module.exports = function(RED) {
 
                 if (!bets.length) { send(msg); return done && done(); }
 
-                // Filter bets
                 const kept = bets.filter(b => !shouldRemove(b));
 
                 msg.bets = kept;
-                // Convenience: track what we cleared
                 msg.cleared = bets.length - kept.length;
 
-                // If we cleared everything and you want to also wipe any grouped dicts upstream, do that in exporter; here we only prune msg.bets
                 send(msg);
                 done && done();
             } catch (err) {
