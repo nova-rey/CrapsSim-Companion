@@ -8,6 +8,12 @@ No coding required—just drag, drop, and connect blocks.
 
 This node pack exposes a supported-only bet surface aligned with the CrapsSim Engine API. For the full list of supported bets and their mappings, see [docs/bet_surface_capabilities.md](./docs/bet_surface_capabilities.md).
 
+## Phase 5 Overview (Odds, Parity, Batch)
+
+- **Odds v1:** Line and Come odds (`odds_pass_line`, `odds_dont_pass`, `odds_come`, `odds_dont_come`) map to the Engine API `odds` verb with the correct base. Odds are Engine-only; vanilla export rejects them explicitly.
+- **Parity mode:** Deterministic dice via `roll_mode: "script"` or `parity_mode: true` with `dice_script` entries per roll. Still sends seeds but rolls come from the script.
+- **Batch runner:** Execute the same `strategy_config` across multiple seeds (explicit list or generated range) and return aggregated stats (`batch_summary`) plus per-run rows (`batch_result`).
+
 ## Bet Surface Overview (Phase 1)
 
 - `bet_surface.json` at the repo root is the single source of truth for every bet identifier used by the pack. Each entry includes a canonical key, the engine code it maps to, and is currently supported for export.

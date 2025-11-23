@@ -15,6 +15,14 @@ The following tables are generated from the current `bet_surface.json` catalog a
 | dont_come | Don't Come | line | dont_come |  |
 | field | Field | field | field |  |
 
+### Odds Bets
+| Key | Label | Family | Engine verb | Notes |
+| --- | --- | --- | --- | --- |
+| odds_pass_line | Pass Odds | odds | odds | Base pass_line; no point required |
+| odds_dont_pass | Don't Pass Odds | odds | odds | Base dont_pass; no point required |
+| odds_come | Come Odds | odds | odds | Base come; requires point number |
+| odds_dont_come | Don't Come Odds | odds | odds | Base dont_come; requires point number |
+
 ### Place Bets
 | Key | Label | Family | Engine verb | Notes |
 | --- | --- | --- | --- | --- |
