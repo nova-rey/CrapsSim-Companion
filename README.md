@@ -1,4 +1,4 @@
-# CrapsSim Compiler (Node-RED Strategy Builder)
+# CrapsSim Companion (Node-RED Strategy Builder)
 
 **Design craps strategies visually → compile into [CrapsSim](https://skent259.github.io/crapssim/) strategies.**
 
@@ -27,4 +27,4 @@ It is a **vanilla-only** release intended for day-to-day use with CrapsSim.
 
 ```bash
 cd ~/.node-red
-npm install nova-rey/crapssim-compiler
+npm install nova-rey/crapssim-companion
