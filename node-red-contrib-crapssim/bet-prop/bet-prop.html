@@ -84,7 +84,7 @@
       $(".node-fixed-only")[show ? "show" : "hide"]();
     }
     RED.nodes.registerType("bet-prop", {
-      category: "Craps: Strategy Builder",
+      category: "craps-bets",
       color: "#4C8BF5",
       icon: "icons/builder-node.svg",
       defaults: {
@@ -106,9 +106,7 @@
       },
       paletteLabel: "Bet: Props/Hardways/Hops",
       label: function() {
-        const n  = (this.propKind === "Hardway" && this.number) ? ` ${this.number}` : "";
-        const vs = this.valueSource === "fixed" ? ` ${this.amount} ${this.unitType}` : " (feed)";
-        return `${this.propKind}${n}${vs}`;
+        return "Bet: Props/Hardways/Hops";
       }
     });
   })();

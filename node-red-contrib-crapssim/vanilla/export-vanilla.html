@@ -1,6 +1,6 @@
 <script type="text/javascript">
 RED.nodes.registerType('export', {
-  category: 'Craps: Execution',
+  category: 'craps-output',
   color: '#6A4CCF',
   defaults: {
     name: { value: "" },
@@ -10,7 +10,7 @@ RED.nodes.registerType('export', {
   outputs: 1,
   icon: "icons/execution-node.svg",
   paletteLabel: "Run: Export to CrapsSim (Legacy)",
-  label: function() { return this.name || "Run: Export (Legacy)"; }
+  label: function() { return "Run: Export to CrapsSim (Legacy)"; }
 });
 </script>
 

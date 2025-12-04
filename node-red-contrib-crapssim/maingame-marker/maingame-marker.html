@@ -27,21 +27,20 @@
 }</pre>
 </script>
 
-<script type="text/javascript">
-  RED.nodes.registerType("maingame-marker", {
-    category: "craps",
-    color: "#E9F0FE",
-    icon: "font-awesome/fa-bookmark",
-    defaults: {
-      action: { value: "begin", required: true },
-      title:  { value: "" },
-      note:   { value: "" }
-    },
-    inputs: 1,
-    outputs: 1,
-    label: function() {
-      const t = this.title ? (": " + this.title) : "";
-      return `Main Game ${this.action}${t}`;
-    }
-  });
-</script>
+  <script type="text/javascript">
+    RED.nodes.registerType("maingame-marker", {
+      category: "craps-markers",
+      color: "#FBBF24",
+      icon: "font-awesome/fa-bookmark",
+      defaults: {
+        action: { value: "begin", required: true },
+        title:  { value: "" },
+        note:   { value: "" }
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function() {
+        return "Main-Game Marker";
+      }
+    });
+  </script>

@@ -49,15 +49,15 @@
   </ul>
 </script>
 
-<script type="text/javascript">
-  RED.nodes.registerType("craps-batch-runner", {
-    category: "Craps: Execution",
+  <script type="text/javascript">
+    RED.nodes.registerType("craps-batch-runner", {
+    category: "craps-output",
     color: "#6A4CCF",
     icon: "icons/execution-node.svg",
     inputs: 1,
     outputs: 1,
     defaults: {
-      apiConfig: { value: "", type: "craps-api-config", required: true },
+      apiConfig: { value: "", type: "api-config", required: true },
       rolls: { value: 100 },
       seed_start: { value: "" },
       seed_count: { value: "" },
@@ -66,9 +66,7 @@
     },
     paletteLabel: "Run: Batch Simulation",
     label: function() {
-      if (this.label) return this.label;
-      const seeds = this.seed_count ? `${this.seed_count} seeds` : "auto seeds";
-      return this.rolls ? `Run: Batch Simulation (${seeds}, ${this.rolls} rolls)` : "Run: Batch Simulation";
+      return "Run: Batch Simulation";
     }
-  });
-</script>
+    });
+  </script>

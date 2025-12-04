@@ -1,8 +1,8 @@
 <script type="text/javascript">
 (function() {
   RED.nodes.registerType('clear', {
-    category: 'Craps: Strategy Builder',
-    color: '#64748B',
+    category: 'craps-bets',
+    color: '#4C8BF5',
     defaults: {
       name:  { value: "" },
       mode:  { value: "all" },       // "all" | "specific"
@@ -14,13 +14,7 @@
     icon: "icons/utility-node.svg",
     paletteLabel: "Clear Bets",
     label: function() {
-      if (this.mode === "all") return this.name || "Clear Bets (all)";
-      const t = Array.isArray(this.types)  ? this.types.join("|") : "";
-      const p = Array.isArray(this.points) ? this.points.join(",") : "";
-      const pieces = [];
-      if (t) pieces.push(`types:${t}`);
-      if (p) pieces.push(`points:${p}`);
-      return this.name || `Clear Bets (${pieces.join(" ") || "specific"})`;
+      return "Clear Bets";
     },
     oneditprepare: function() {
       function setSpecificVisible(show) {

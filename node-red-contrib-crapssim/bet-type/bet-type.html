@@ -107,7 +107,7 @@
         return ctx.working ? " (work)" : "";
       }
       RED.nodes.registerType("bet-type", {
-        category: "Craps: Strategy Builder",
+        category: "craps-bets",
         color: "#4C8BF5",
         icon: "icons/builder-node.svg",
         defaults: {
@@ -129,9 +129,7 @@
         },
         paletteLabel: "Bet: Line/Place/Lay/Odds",
         label: function() {
-          const n  = this.number ? ` ${this.number}` : "";
-          const vs = this.valueSource === "fixed" ? ` ${this.amount} ${this.unitType}` : " (feed)";
-          return `${this.kind}${n}${vs}${labelWorkingSuffix(this)}`;
+          return "Bet: Line/Place/Lay/Odds";
         }
       });
     })();

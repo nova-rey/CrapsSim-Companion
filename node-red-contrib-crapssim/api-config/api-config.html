@@ -1,4 +1,4 @@
-<script type="text/html" data-template-name="craps-api-config">
+<script type="text/html" data-template-name="api-config">
   <div class="form-row">
     <label for="node-config-input-base_url"><i class="fa fa-link"></i> Base URL</label>
     <input type="text" id="node-config-input-base_url" placeholder="http://127.0.0.1:8000">
@@ -37,7 +37,7 @@
   </div>
 </script>
 
-<script type="text/html" data-help-name="craps-api-config">
+<script type="text/html" data-help-name="api-config">
   <p>Holds shared configuration for CrapsSim Engine HTTP API calls.</p>
   <ul>
     <li><b>Base URL</b>: Prefix for all Engine API calls.</li>
@@ -49,20 +49,22 @@
 </script>
 
 <script type="text/javascript">
-  RED.nodes.registerType("craps-api-config", {
-    category: "config",
+RED.nodes.registerType('api-config', {
+    category: 'craps-config',
+    color: '#64748B',
     defaults: {
-      base_url: { value: "http://127.0.0.1:8000", required: true },
-      profile_id: { value: "default" },
-      default_seed_mode: { value: "random" },
-      seed: { value: "" },
-      timeout_ms: { value: 5000 },
-      retries: { value: 0 },
-      retry_backoff_ms: { value: 0 },
-      auth_token: { value: "" }
+        base_url: { value: "http://127.0.0.1:8000" },
+        profile_id: { value: "default" },
+        default_seed_mode: { value: "random" },
+        seed: { value: "" },
+        timeout_ms: { value: 5000 },
+        retries: { value: 0 },
+        retry_backoff_ms: { value: 0 },
+        auth_token: { value: "" }
     },
-    label: function() {
-      return this.base_url ? `Craps API @ ${this.base_url}` : "Craps API Config";
-    }
-  });
+    inputs: 0,
+    outputs: 0,
+    icon: "config.svg",
+    label: function() { return "API Config"; }
+});
 </script>

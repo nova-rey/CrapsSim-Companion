@@ -30,8 +30,8 @@
 
 <script type="text/javascript">
   RED.nodes.registerType("bet-in", {
-    category: "Craps: Strategy Builder",
-    color: "#64748B",
+    category: "craps-bets",
+    color: "#4C8BF5",
     icon: "icons/utility-node.svg",
     defaults: {
       betId: { value: "", required: true }
@@ -40,7 +40,7 @@
     outputs: 0,
     paletteLabel: "Bet Variable",
     label: function() {
-      return this.betId ? `Bet Variable (${this.betId})` : "Bet Variable";
+      return "Bet Variable";
     }
   });
 </script>

@@ -31,8 +31,8 @@
       $(".fixed-only")[show ? "show" : "hide"]();
     }
     RED.nodes.registerType("var-max-rolls", {
-      category: "craps",
-      color: "#EFF7FF",
+      category: "craps-config",
+      color: "#64748B",
       icon: "font-awesome/fa-repeat",
       defaults: {
         mode:  { value: "infinite", required: true },
@@ -46,7 +46,7 @@
         toggleFixed();
       },
       label: function(){
-        return this.mode === "fixed" ? `max-rolls=${this.value}` : "max-rolls=∞";
+        return "Var: Max Rolls";
       }
     });
   })();

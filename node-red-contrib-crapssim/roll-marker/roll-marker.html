@@ -21,8 +21,8 @@
 
 <script type="text/javascript">
   RED.nodes.registerType("roll-marker", {
-    category: "craps",
-    color: "#F3E8FF",
+    category: "craps-markers",
+    color: "#FBBF24",
     icon: "font-awesome/fa-dot-circle-o",
     defaults: {
       title: { value: "" },
@@ -31,7 +31,7 @@
     inputs: 1,
     outputs: 1,
     label: function() {
-      return this.title ? `Roll: ${this.title}` : "Roll";
+      return "Roll Marker";
     }
   });
 </script>

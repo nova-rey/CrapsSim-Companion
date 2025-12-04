@@ -1,8 +1,8 @@
 <script type="text/javascript">
 (function() {
   RED.nodes.registerType('validator', {
-    category: 'craps',
-    color: '#D6EAF8',
+    category: 'craps-output',
+    color: '#6A4CCF',
     defaults: {
       name:   { value: "" },
       strict: { value: false },   // If true, any warning/error sets ok=false
@@ -12,7 +12,7 @@
     outputs: 1,
     icon: "font-awesome/fa-check",
     label: function() {
-      return this.name || "validator";
+      return "Validate Strategy (Legacy)";
     }
   });
 })();

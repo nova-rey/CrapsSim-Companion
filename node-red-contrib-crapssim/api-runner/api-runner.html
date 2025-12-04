@@ -45,15 +45,15 @@
   </ul>
 </script>
 
-<script type="text/javascript">
-  RED.nodes.registerType("craps-api-runner", {
-    category: "Craps: Execution",
+  <script type="text/javascript">
+    RED.nodes.registerType("craps-api-runner", {
+    category: "craps-output",
     color: "#6A4CCF",
     icon: "icons/execution-node.svg",
     inputs: 1,
     outputs: 1,
     defaults: {
-      apiConfig: { value: "", type: "craps-api-config", required: true },
+      apiConfig: { value: "", type: "api-config", required: true },
       rolls: { value: 100 },
       strict_mode: { value: false },
       prepare_file_output: { value: false },
@@ -61,8 +61,7 @@
     },
     paletteLabel: "Run: Engine API Simulation",
     label: function() {
-      if (this.label) return this.label;
-      return this.rolls ? `Run: Engine API Simulation (${this.rolls} rolls)` : "Run: Engine API Simulation";
+      return "Run: Engine API Simulation";
     }
-  });
-</script>
+    });
+  </script>

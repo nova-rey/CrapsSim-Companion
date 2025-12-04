@@ -16,8 +16,8 @@
 <script type="text/javascript">
   (function(){
     RED.nodes.registerType("var-bankroll", {
-      category: "craps",
-      color: "#FFF7E6",
+      category: "craps-config",
+      color: "#64748B",
       icon: "font-awesome/fa-briefcase",
       defaults: {
         amount: { value: 300, required: true },
@@ -26,7 +26,7 @@
       inputs: 1,
       outputs: 1,
       label: function(){
-        return `bankroll=$${this.amount}`;
+        return "Var: Bankroll";
       }
     });
   })();

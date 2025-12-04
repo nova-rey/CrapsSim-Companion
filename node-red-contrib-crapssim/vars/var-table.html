@@ -1,7 +1,7 @@
 <script type="text/javascript">
 RED.nodes.registerType('var-table', {
-  category: 'craps',
-  color: '#C0E6FF',
+  category: 'craps-config',
+  color: '#64748B',
   defaults: {
     name: { value: "" },
     mode: { value: "10" } // default $10 table
@@ -10,8 +10,7 @@ RED.nodes.registerType('var-table', {
   outputs: 1,
   icon: "font-awesome/fa-table",
   label: function() {
-    const label = this.mode === "bubble" ? "bubble" : "$" + this.mode;
-    return this.name || ("var-table: " + label);
+    return "Var: Table";
   },
   oneditprepare: function() {
     $("#node-input-mode").val(this.mode || "10");
