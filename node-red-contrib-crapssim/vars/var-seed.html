@@ -35,8 +35,8 @@
       $(".fixed-only")[show ? "show" : "hide"]();
     }
     RED.nodes.registerType("var-seed", {
-      category: "craps",
-      color: "#F0E6FF",
+      category: "craps-config",
+      color: "#64748B",
       icon: "font-awesome/fa-random",
       defaults: {
         mode:  { value: "none", required: true },
@@ -50,9 +50,7 @@
         toggleFixed();
       },
       label: function(){
-        if (this.mode === "fixed") return this.value ? `seed=${this.value}` : "seed=(fixed)";
-        if (this.mode === "random") return "seed=random";
-        return "seed=none";
+        return "Var: Seed";
       }
     });
   })();

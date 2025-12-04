@@ -33,7 +33,7 @@
 <script type="text/javascript">
   (function(){
     RED.nodes.registerType("strategy-compiler", {
-      category: "Craps: Strategy Builder",
+      category: "craps-bets",
       color: "#4C8BF5",
       icon: "icons/builder-node.svg",
       defaults: {
@@ -44,7 +44,7 @@
       outputs: 1,
       paletteLabel: "Compile Strategy",
       label: function() {
-        return this.strategyName || "Compile Strategy";
+        return "Compile Strategy";
       }
     });
   })();
