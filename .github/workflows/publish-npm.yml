@@ -1,0 +1,34 @@
+name: Publish to npm (trusted)
+
+on:
+  # You can change this to "push" on main if you want, but
+  # releases are usually nicer for libraries.
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write   # needed for npm trusted publishing
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Publish to npm (trusted publishing)
+        run: npm publish --provenance --access public
