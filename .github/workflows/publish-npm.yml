@@ -1,28 +1,32 @@
-name: Publish to npm (trusted)
+name: publish
 
 on:
-  # You can change this to "push" on main if you want, but
-  # releases are usually nicer for libraries.
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  id-token: write
+  contents: read
+
+defaults:
+  run:
+    working-directory: node-red-contrib-crapssim
 
 jobs:
   publish:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      id-token: write   # needed for npm trusted publishing
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org/'
+
       - name: Install deps
         run: npm install
 
