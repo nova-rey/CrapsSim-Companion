@@ -11,5 +11,5 @@ module.exports = function(RED) {
         this.auth_token = config.auth_token;
     }
 
-    RED.nodes.registerType("api-config", CrapsApiConfigNode);
+    RED.nodes.registerType("craps-api-config", CrapsApiConfigNode);
 };
