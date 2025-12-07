@@ -3,15 +3,11 @@ name: publish
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'          # or whatever tag pattern you like
 
 permissions:
-  id-token: write
   contents: read
-
-defaults:
-  run:
-    working-directory: node-red-contrib-crapssim
+  id-token: write     # REQUIRED for trusted publishing
 
 jobs:
   publish:
@@ -21,17 +17,20 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org/'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install deps
+        working-directory: node-red-contrib-crapssim
         run: npm install
 
       - name: Run tests
+        working-directory: node-red-contrib-crapssim
         run: npm test
 
       - name: Publish to npm (trusted publishing)
+        working-directory: node-red-contrib-crapssim
         run: npm publish --provenance --access public
