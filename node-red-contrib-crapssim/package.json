@@ -49,7 +49,7 @@
   },
   "author": "Nova+Rey",
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nova-rey/CrapsSim-Companion.git"
-  }
+  "type": "git",
+  "url": "git+https://github.com/nova-rey/CrapsSim-Companion.git"
+}
 }
