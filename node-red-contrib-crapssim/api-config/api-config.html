@@ -1,4 +1,4 @@
-<script type="text/html" data-template-name="api-config">
+<script type="text/html" data-template-name="craps-api-config">
   <div class="form-row">
     <label for="node-config-input-base_url"><i class="fa fa-link"></i> Base URL</label>
     <input type="text" id="node-config-input-base_url" placeholder="http://127.0.0.1:8000">
@@ -37,7 +37,7 @@
   </div>
 </script>
 
-<script type="text/html" data-help-name="api-config">
+<script type="text/html" data-help-name="craps-api-config">
   <p>Holds shared configuration for CrapsSim Engine HTTP API calls.</p>
   <ul>
     <li><b>Base URL</b>: Prefix for all Engine API calls.</li>
@@ -49,7 +49,7 @@
 </script>
 
 <script type="text/javascript">
-RED.nodes.registerType('api-config', {
+RED.nodes.registerType('craps-api-config', {
     category: 'craps-config',
     color: '#64748B',
     defaults: {
