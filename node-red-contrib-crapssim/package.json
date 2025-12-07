@@ -42,12 +42,14 @@
     "print:verbs": "node scripts/print_verbs.js"
   },
   "dependencies": {
-    "axios": "^1.7.7",
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
     "nock": "^13.5.0"
   },
   "author": "Nova+Rey",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nova-rey/crapssim-companion/"
+    "url": "git+https://github.com/nova-rey/CrapsSim-Companion.git"
   }
 }
